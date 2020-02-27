@@ -1,0 +1,23 @@
+// {
+//     "defaultSeverity": "error",
+//     "extends": [
+//         "tslint:recomended"
+//     ],
+//     "jsRules": {},
+//     "rules": {
+//         "trailing-comma": [false],
+//         "use-default-type-parameter": true
+//     },
+//     "rulesDirectory": []
+// }
+
+{
+    "defaultSeverity": "error",
+    "extends": [],
+    "jsRules": {},
+    "rules": {
+        "trailing-comma": [false],
+        "use-default-type-parameter": true
+    },
+    "rulesDirectory": []
+}

@@ -1,0 +1,37 @@
+{
+  "name": "digitalframe_s",
+  "version": "2.3.0",
+  "description": "digitalFrame program server",
+  "main": "dist/appServer.js",
+  "scripts": {
+    "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
+    "build": "tsc",
+    "heroku-postbuild": "webpack",
+    "production": "node dist/appServer.bundle.js",
+    "prestart": "npm run build",
+    "start": "ts-node src/appServer.ts",
+    "dev": "nodemon --inspect src/appServer.ts",
+    "test": "jest"
+  },
+  "author": "Noam Aghai",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "1.18.3",
+    "express": "4.16.2"
+  },
+  "devDependencies": {
+    "@types/express": "4.16.1",
+    "@types/jest": "24.0.12",
+    "@types/node": "12.0.0",
+    "jest": "24.7.1",
+    "nodemon": "^2.0.2",
+    "ts-jest": "24.0.2",
+    "ts-loader": "6.0.4",
+    "ts-node": "^8.5.2",
+    "tslint": "5.16.0",
+    "typescript": "3.5.3",
+    "webpack": "4.28.4",
+    "webpack-cli": "3.3.2",
+    "webpack-node-externals": "1.7.2"
+  }
+}
