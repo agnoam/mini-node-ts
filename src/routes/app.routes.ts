@@ -4,9 +4,7 @@ import { AppCtrl } from '../controllers/app.controller';
 console.log("import app.routes");
 
 // The node.js simple code here
-const router: Router = Router();
+export const appRouter: Router = Router();
 
 // The post port like this
-router.post('/post', AppCtrl.doPost_R);
-
-module.exports = router;
+appRouter.post('/post', AppCtrl.doPost_R);

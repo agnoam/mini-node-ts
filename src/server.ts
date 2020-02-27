@@ -2,6 +2,8 @@
 import bodyParser from "body-parser";
 import express from "express";
 import os from "os";
+import { serverMiddleware } from "./middlewares/app.middleware";
+import { RoutesConfig } from "./config/routes.config";
 
 // Config the
 const app: express.Application = express();
@@ -36,11 +38,10 @@ Object.keys(ifaces).forEach((ifname) => {
 // Middelwares
 app.use( bodyParser.json() );
 app.use( bodyParser.urlencoded({ extended: true }) );
-
-require('./middlewares/app.middleware')(app);
+app.use( serverMiddleware );
 
 /******************** API ********************/
-require("./config/routes.config")(app);
+RoutesConfig(app);
 /*********************************************/
 
 app.listen(port, () => {

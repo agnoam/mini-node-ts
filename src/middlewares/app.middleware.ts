@@ -1,11 +1,8 @@
-import { Application, Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 
 console.log('import app.middleware');
 
-module.exports = (app: Application) => {
-    app.use((req: Request, res: Response, next) => {        
-        console.log('middleware of application');
-
-        next();
-    });
+export const serverMiddleware = (req: Request, res: Response, next: NextFunction) => {
+    console.log('middleware of application');
+    next();
 }
