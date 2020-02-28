@@ -7,4 +7,6 @@ console.log("import app.routes");
 export const appRouter: Router = Router();
 
 // The post port like this
-appRouter.post('/post', AppCtrl.doPost_R);
+appRouter
+  // .get('/bla', 'AppCtrl.myBla_R);
+  .post('/post', AppCtrl.doPost_R);
