@@ -5,9 +5,10 @@ console.log("import routes.config");
 
 export const RoutesConfig = (app: Application) => {
     // Define the api to where go
-    app.use('/app', appRouter);
+    app
+        .use('/app', appRouter)
 
-    app.get('/', (req: Request, res: Response) => {
-        res.send('node-ts server is running ;)');
-    });
+        .get('/', (req: Request, res: Response) => {
+            res.send('node-ts server is running ;)');
+        });
 }
