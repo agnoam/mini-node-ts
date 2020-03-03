@@ -5,6 +5,7 @@ import os from "os";
 import { ServerMiddleware } from "./middlewares/app.middleware";
 import { RoutesConfig } from "./config/routes.config";
 import { DBDriver } from "./config/mongo.config";
+import { initializeFirebase } from './config/firebase.config';
 
 const app: express.Application = express();
 const port: number = +process.env.PORT || 8810; // + means cast to number type in typescript
@@ -33,6 +34,7 @@ Object.keys(ifaces).forEach((ifname) => {
 
 /****************** Configs ******************/
 DBDriver.connect();
+// initializeFirebase();
 /**************** Middelwares ****************/
 app.use( bodyParser.json() );
 app.use( bodyParser.urlencoded({ extended: true }) );
