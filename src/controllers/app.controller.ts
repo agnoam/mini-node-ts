@@ -64,10 +64,7 @@ export module AppCtrl {
     }
 
     export async function deleteUser_R(req: Request, res: Response): Promise<Response> {
-        const userData = {
-            username: req.body.username,
-            password: req.body.password
-        }
+        const userData: LoginRequestBody = req.body;
 
         try {
             if(await isLegit(userData.username, userData.password)) {
@@ -76,6 +73,10 @@ export module AppCtrl {
                     description: 'User deleted successfuly'
                 });
             }
+            
+            return res.status(ResponseStatus.Ok).json({ 
+                description: 'User credentials is not accurte, Please change and try again'
+            });
         } catch(ex) {
             console.error(ex);
             return res.status(ResponseStatus.InternalError).json({
@@ -86,8 +87,7 @@ export module AppCtrl {
 
     async function isLegit(username: string, password: string): Promise<IUser> {
         try {
-            const userQuery: DocumentQuery<IUser, IUser> = 
-                UserModel.findOne({ username: username });
+            const userQuery: DocumentQuery<IUser, IUser> = UserModel.findOne({ username: username });
             const userData: IUser = await userQuery.exec();
 
             // Encrypting the password with md5

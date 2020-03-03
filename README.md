@@ -10,6 +10,11 @@ And all of this with 100% typescript support
 So how to make this charm to work ???
 Just run `yarn` and this project good to go
 
+    - Initialize db
+        For using monogodb: create file in `./config/mongo-data.config.json` and put `uri:` field in it with your mongodb uri
+
+        For using firebase: download the credentials json file from firebase console and put it in `./config/<your-file>` and don't forget change `serviceAccount` import path to your file path.
+
 # Support
 Heroku dyno support
 
