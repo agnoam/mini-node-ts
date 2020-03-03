@@ -12,8 +12,16 @@ So how to make this charm to work ???
 Just run `yarn` and this project good to go
 
 ### Initialize db
-For using monogodb: create file in `./config/mongo-data.config.json` and put `uri:` field in it with your mongodb uri
-For using firebase: download the credentials json file from firebase console and put it in `./config/<your-file>` and don't forget change `serviceAccount` import path to your file path.
+For using **monogodb**: create file in `./config/mongo-data.config.json` and put `uri:` field in it with your mongodb uri
+
+For using **firebase**: download the credentials json file from firebase console and put it in `./config/<your-file>` and don't forget change `serviceAccount` import path to your file path.
+*example:* from 
+
+`import serviceAccount from "./firebase-adminsdk.json";` 
+
+to 
+
+`import serviceAccount from "./fbase-proj1e2j.json";`
 
 ## Support
 Heroku dyno support
