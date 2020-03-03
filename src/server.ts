@@ -2,19 +2,18 @@
 import bodyParser from "body-parser";
 import express from "express";
 import os from "os";
-import { serverMiddleware } from "./middlewares/app.middleware";
+import { ServerMiddleware } from "./middlewares/app.middleware";
 import { RoutesConfig } from "./config/routes.config";
 
-// Config the
 const app: express.Application = express();
-const port: number = +process.env.PORT || 8810; // + means cast to number in typescript
+const port: number = +process.env.PORT || 8810; // + means cast to number type in typescript
 
 // Get the server's local ip
-const ifaces = os.networkInterfaces();
+const ifaces: NetworkInterface = os.networkInterfaces();
 let localIP: string;
 
 Object.keys(ifaces).forEach((ifname) => {
-  let alias = 0;
+  let alias: number = 0;
 
   ifaces[ifname].forEach((iface) => {
     if ("IPv4" !== iface.family || iface.internal !== false) {
@@ -22,13 +21,8 @@ Object.keys(ifaces).forEach((ifname) => {
       return;
     }
 
-    if (alias >= 1) {
-      // This single interface has multiple ipv4 addresses
-      //  console.log(ifname + ':' + alias, iface.address);
-    } else {
-      // This interface has only one ipv4 adress
-      // console.log(ifname, iface.address);
-        localIP = iface.address;
+    if (alias < 1) {
+      localIP = iface.address;
     }
     
     ++alias;
@@ -38,7 +32,7 @@ Object.keys(ifaces).forEach((ifname) => {
 // Middelwares
 app.use( bodyParser.json() );
 app.use( bodyParser.urlencoded({ extended: true }) );
-app.use( serverMiddleware );
+app.use( ServerMiddleware );
 
 /******************** API ********************/
 RoutesConfig(app);
@@ -48,3 +42,7 @@ app.listen(port, () => {
   console.log(`Our app server is running on http://${os.hostname()}:${port}`);
   console.log(`Server running on: http://${localIP}:${port}`);
 });
+
+interface NetworkInterface {
+  [index: string]: os.NetworkInterfaceInfo[];
+}

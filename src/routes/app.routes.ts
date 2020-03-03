@@ -8,5 +8,5 @@ export const appRouter: Router = Router();
 
 // The post port like this
 appRouter
-  // .get('/bla', 'AppCtrl.myBla_R);
+  // .get('/bla', 'AppCtrl.myBla_R)
   .post('/post', AppCtrl.doPost_R);
