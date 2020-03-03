@@ -4,6 +4,7 @@ import express from "express";
 import os from "os";
 import { ServerMiddleware } from "./middlewares/app.middleware";
 import { RoutesConfig } from "./config/routes.config";
+import { DBDriver } from "./config/mongo.config";
 
 const app: express.Application = express();
 const port: number = +process.env.PORT || 8810; // + means cast to number type in typescript
@@ -29,11 +30,13 @@ Object.keys(ifaces).forEach((ifname) => {
   });
 });
 
-// Middelwares
+
+/****************** Configs ******************/
+DBDriver.connect();
+/**************** Middelwares ****************/
 app.use( bodyParser.json() );
 app.use( bodyParser.urlencoded({ extended: true }) );
 app.use( ServerMiddleware );
-
 /******************** API ********************/
 RoutesConfig(app);
 /*********************************************/

@@ -10,3 +10,7 @@ export enum ResponseStatus {
     Accepted = 202,
     Found = 302
 }
+
+export enum CollectionsNames {
+    Users = 'users'
+}

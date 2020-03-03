@@ -11,3 +11,4 @@ Heroku dyno support
 This project customised for Visual Studio Code and has breakpoints support for:
 * Regular debugging by `F5` key
 * Debuging for typescript jest
+* For Nodemon inspection and debugging run `yarn dev` and then run the saved configuration
