@@ -102,87 +102,84 @@ export module AppCtrl {
     }
 
     /*********************************** Firebase Read / Write / Delete Example ***********************************/
-    // function firebaseLogin(username: string, password: string): Promise<boolean> {
-    //     return new Promise( (resolve, reject) => {
+    // async function firebaseLogin(username: string, password: string): Promise<boolean> {
+    //     try {
     //         const userQuery: database.Query = db.ref(`/users/`).child('username').equalTo(username);
-    //         userQuery.once('value', (snapshot: database.DataSnapshot) => {
-    //             if(snapshot.exists()) {
-    //                 const user: User = snapshot.val();
-    //                 if(user.password === md5(password)) {
-    //                     return resolve(true);
-    //                 }
-    //                 return resolve(false);
-    //             }
-    //             return reject("User doesn't exists");
-    //         },
-    //         (ex) => {
-    //             throw ex;
-    //         });
-    //     });
-    // }
-
-    // function firebaseSignUp(user: User): Promise<string> {
-    //     return new Promise( async (resolve, reject) => {
-    //         const usersRef: database.Reference = db.ref('/users');
+    //         const snapshot: database.DataSnapshot = await userQuery.once('value');
             
-    //         if(user.password && user.email && user.name && user.username) {
-    //             user.password = md5(user.password);
-    //             user.profileImage = !user.profileImage ? userDefaultImage : user.profileImage;
-    //             user.date = !user.date ? Date.now() : user.date;
-
-    //             if(!await firebaseIsExists({ username: user.username, email: user.email })) {
-    //                 const newRef: database.ThenableReference = usersRef.push(user, (ex: Error) => {
-    //                     if(ex) return reject({ description: 'firebase push ex', data: ex });
-    //                 });
-
-    //                 return resolve(newRef.key);
+    //         if(snapshot.exists()) {
+    //             const user: User = snapshot.val();
+    //             if(user.password === md5(password)) {
+    //                 return true;
     //             }
+    //             return false;
     //         }
-    //         return reject('Missing reqired propery of the user');
-    //     });
+
+    //         throw "User doesn't exists";
+    //     } catch(ex) {
+    //         throw ex;
+    //     }
     // }
 
-    // function firebaseIsExists(data: { username?: string, email?: string }): Promise<string> {
-    //     return new Promise( (resolve, reject) => {
-    //         if(data.username || data.email) {
-    //             const usersRef: database.Reference = db.ref('/users');
-    //             if(data.username) {
-    //                 const usernameQuery: database.Query = usersRef.child('username').equalTo(data.username);
-    //                 usernameQuery.once('value', (snapshot: database.DataSnapshot) => {
-    //                     return resolve(!snapshot.exists() ? snapshot.key : null);
-    //                 },
-    //                 (ex) => reject({ description: 'username query firebase ex', data: ex }));
-    //             } else if(data.email) {
-    //                 const emailQuery: database.Query = usersRef.child('email').equalTo(data.email);
-    //                 emailQuery.once('value', (snapshot: database.DataSnapshot) => {
-    //                     return resolve(!snapshot.exists() ? snapshot.key : null);
-    //                 },
-    //                 (ex) => reject({ description: 'username query firebase ex', data: ex }));
-    //             }
+    // async function firebaseSignUp(user: User): Promise<string> {
+    //     const usersRef: database.Reference = db.ref('/users');
+        
+    //     if(user.password && user.email && user.name && user.username) {
+    //         user.password = md5(user.password);
+    //         user.profileImage = !user.profileImage ? userDefaultImage : user.profileImage;
+    //         user.date = !user.date ? Date.now() : user.date;
 
-    //             return reject('Data must have username or email, Fill the data and try again');   
+    //         if(!await firebaseIsExists({ username: user.username, email: user.email })) {
+    //             try {
+    //                 const newRef: database.Reference = await usersRef.push(user);
+    //                 return newRef.key;
+    //             } catch(ex) {
+    //                 throw { description: 'firebase push ex', data: ex };
+    //             }
     //         }
-    //     });
+    //     }
+    //     throw 'Missing reqired propery of the user';
     // }
 
-    // function firebaseDelete(userID: string): Promise<void> {
-    //     return new Promise(async (resolve, reject) => {
-    //         try {
-    //             const userRef: database.Reference = db.ref(`/users/${userID}`);
-    //             await userRef.remove((ex: Error) => {
-    //                 if(ex) { 
-    //                     return reject({
-    //                         description: 'firebase database user remove ex',
-    //                         data: ex
-    //                     });
-    //                 }
-    //             });
+    // async function firebaseIsExists(data: { username?: string, email?: string }): Promise<string> {
+    //     if(data.username || data.email) {
+    //         const usersRef: database.Reference = db.ref('/users');
 
-    //             return resolve();
-    //         } catch(ex) {
-    //             return reject(ex);
+    //         if(data.username) {
+    //             try {
+    //                 return await firebaseIsValueExists(usersRef, 'username', data.username);
+    //             } catch(ex) { 
+    //                 throw { description: 'username query firebase ex', data: ex }; 
+    //             }
+    //         } else if(data.email) {
+    //             try {
+    //                 return await firebaseIsValueExists(usersRef, 'email', data.email);
+    //             } catch(ex) { 
+    //                 throw { description: 'email query firebase ex', data: ex }; 
+    //             }
     //         }
-    //     });
+    //     }
+
+    //     throw 'Data must have username or email, Fill the data and try again';
+    // }
+
+    // async function firebaseIsValueExists(ref: database.Reference, childName: string, equalTo: any): Promise<string> {
+    //     const usernameQuery: database.Query = ref.child(childName).equalTo(equalTo);
+    //     const snapshot: database.DataSnapshot = await usernameQuery.once('value');
+        
+    //     return !snapshot.exists() ? snapshot.key : null;
+    // }
+
+    // async function firebaseDelete(userID: string): Promise<void> {
+    //     try {
+    //         const userRef: database.Reference = db.ref(`/users/${userID}`);
+    //         await userRef.remove();
+    //     } catch(ex) {
+    //         throw {
+    //             description: 'firebase database user remove ex',
+    //             data: ex
+    //         }
+    //     }
     // }
 }
 
