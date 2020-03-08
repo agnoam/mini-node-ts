@@ -26,6 +26,9 @@ to
 ## Support
 Heroku dyno support
 
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/agnoam/mini-node-ts)
+
+
 ## Debugging
 This project customised for Visual Studio Code and has breakpoints support for:
 * Regular debugging by `F5` key
