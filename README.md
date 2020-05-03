@@ -7,7 +7,7 @@ Super minimal node js application with:
 And all of this with 100% typescript support
 
 ## Initialize
-So how to make this charm to work ???
+So how to make this charm work ???
 
 Just run `yarn` and this project good to go
 
