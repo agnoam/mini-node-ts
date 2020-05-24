@@ -18,8 +18,8 @@ export class ServerBoot {
 
     this.server = this.createServer();
 
-    this.configModules();
     this.loadMiddlewares();
+    this.configModules();
 
     this.serverListen();
   }
