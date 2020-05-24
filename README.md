@@ -21,7 +21,7 @@ For using **firebase**: download the credentials json file from firebase console
 
 to 
 
-`import serviceAccount from "./fbase-proj1e2j.json";`
+`import serviceAccount from "./<genrated_firebase_filename>.json";`
 
 ## Support
 Heroku dyno support
