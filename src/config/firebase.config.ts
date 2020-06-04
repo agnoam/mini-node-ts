@@ -1,6 +1,9 @@
 import admin, { ServiceAccount, database, auth as fbaseAuth } from "firebase-admin";
 // Fetch the service account key JSON file contents, PUT YOUR ADMIN SDK CREDENTIALS JSON
-import serviceAccount from "./firebase-adminsdk.json";
+// import serviceAccount from "./firebase-adminsdk.json";
+
+// Uncomment this when you are using your actual firebase
+const serviceAccount = {};
 
 console.log("import firebase.config");
 

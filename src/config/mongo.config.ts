@@ -1,10 +1,11 @@
 import mongoose, { Mongoose } from 'mongoose';
-import configData from './mongo-data.config.json';
+import dotenv from 'dotenv';
+dotenv.config(); // Loading all environment variables
 
 export module DBDriver {
   export async function connect(): Promise<boolean> {
     try {
-      const connected = await this.connectDB(configData.uri);
+      const connected = await this.connectDB(process.env.MONGODB_URI);
       console.log("Connected to mongo database successfully");
 
       return connected;
