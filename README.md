@@ -25,10 +25,6 @@ to
 
 `import serviceAccount from "./<firebase-generated-file>.json";`
 
-## Deployment
-Easy deploy to Heroku:
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
-
 ## Support
 Heroku dyno support
 You also can use Heroku's `mLab MongoDB` add-on for easy setup for the production server 
