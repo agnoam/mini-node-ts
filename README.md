@@ -8,7 +8,7 @@ Super minimal node.js (typescript) application with:
 And all of this with 100% typescript support
 
 ## Initialize
-So how to make this charm to work ???
+So how to make this charm work ???
 
 Just run `yarn` and this project good to go
 
@@ -32,6 +32,9 @@ Easy deploy to Heroku:
 ## Support
 Heroku dyno support
 You also can use Heroku's `mLab MongoDB` add-on for easy setup for the production server 
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/agnoam/mini-node-ts)
+
 
 ## Debugging
 This project customised for Visual Studio Code and has breakpoints support for:
