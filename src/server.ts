@@ -1,3 +1,4 @@
+
 /************* Moduls **************/
 import bodyParser from "body-parser";
 import express, { Application } from "express";
@@ -6,29 +7,39 @@ import { ServerMiddleware } from "./middlewares/app.middleware";
 import { RoutesConfig } from "./config/routes.config";
 import { DBDriver } from "./config/mongo.config";
 import http, { Server } from "http";
+import socketIO from "socket.io";
 // import { initializeFirebase } from './config/firebase.config';
 
 export class ServerBoot {
   private readonly port: number = +process.env.PORT || 8810;
   private app: Application;
-  private server: Server;
+  public server: Server;
+  public io: SocketIO.Server;
 
   constructor() {
     this.app = express();
-
     this.server = this.createServer();
 
-    this.loadMiddlewares();
-    this.configModules();
+    // Remove this if you does not want socket.io in your project
+    this.io = this.getSocket(this.server); 
 
-    this.serverListen();
+    this.listen();
   }
 
   private createServer(): Server {
     return http.createServer(this.app);
   }
 
-  private serverListen(): void {
+  /* If you don't need socket.io in your project delete this, 
+    and don't forget to remove the `socket.io`, `@types/socket.io` dependencies */
+  private getSocket(server: Server): socketIO.Server {
+    return socketIO.listen(server);
+  }
+
+  private listen(): void {
+    this.loadMiddlewares();
+    this.configModules();
+    
     const localIP: string = this.findMyIP();
 
     this.server.listen(this.port, () => {

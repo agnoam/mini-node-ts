@@ -1,10 +1,13 @@
 # mini-node-ts
 Super minimal node.js (typescript) application with: 
-    typescript
-    jest (testing), 
-    nodemon, 
-    mongodb (mongoose), 
-    firebase
+
+* Typescript
+* Jest (testing), 
+* Nodemon, 
+* Mongodb (mongoose), 
+* Firebase (real-time database),
+* Socket.io
+
 And all of this with 100% typescript support
 
 ## Initialize
@@ -26,8 +29,11 @@ to
 `import serviceAccount from "./<firebase-generated-file>.json";`
 
 ## Support
-Heroku dyno support
-You also can use Heroku's `mLab MongoDB` add-on for easy setup for the production server 
+Heroku dyno support:
+
+~~You also can use Heroku's `mLab MongoDB` add-on for easy setup for the production server~~
+
+Heroku's MongoDB add-on **will not be supported since 11/2020**, For this Initialize the MongoDB manually (details in the section above)
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/agnoam/mini-node-ts)
 
@@ -47,5 +53,5 @@ And also the configurations for db. (`mongo.config.ts` or `firebase.config.ts`)
 
 Before you start you may choose which package manager you want to use along the way. So don't forget to delete the alternative lock file.
 
-For example:
-    if you are using `yarn` don't forget to delete `package-lock.json`
+#### For example:
+In case you are using `yarn` don't forget to delete `package-lock.json`. (and likewise the other way with: `yarn.lock`)
