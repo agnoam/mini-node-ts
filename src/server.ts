@@ -3,7 +3,7 @@
 import bodyParser from "body-parser";
 import express, { Application } from "express";
 import os from "os";
-import { ServerMiddleware } from "./middlewares/app.middleware";
+import { ServerMiddleware } from "./middlewares/server.middleware";
 import { RoutesConfig } from "./config/routes.config";
 import { DBDriver } from "./config/mongo.config";
 import http, { Server } from "http";

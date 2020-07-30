@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { ResponseStatus } from "../utils/consts";
-import { UserModel, IUser } from '../models/user.model';
+import { ResponseStatus } from "../../utils/consts";
+import { UserModel, IUser } from './user.model';
 import { DocumentQuery } from "mongoose";
 import md5 from 'md5';
 
@@ -12,7 +12,7 @@ import md5 from 'md5';
 
 console.log("import app.controller");
 
-export module AppCtrl {
+export module UserCtrl {
     export function doPost_R(req: Request, res: Response): Response {
         return res.status(ResponseStatus.Ok).json({
             date: Date.now(),
