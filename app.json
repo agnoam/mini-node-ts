@@ -2,6 +2,6 @@
     "name": "mini-node-ts",
     "description": "Super minimal node.js (typescript) application",
     "repository": "https://github.com/agnoam/mini-node-ts",
-    "logo": "https://github.com/agnoam/mini-node-ts/blob/master/github_online_assets(delete%20locally)/heroku_process_pictures/node-js.png",
+    "logo": "https://cdn.iconscout.com/icon/free/png-256/node-js-1174925.png",
     "keywords": ["node", "typescript", "express", "mongoose", "mongodb", "firebase-admin", "template", "jest"]
   }
