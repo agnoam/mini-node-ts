@@ -88,6 +88,7 @@ definitions:
         type: "string"
       password:
         type: "string"
+        format: "password"
   LoginResponseObj:
     type: "object"
     required:
@@ -99,9 +100,11 @@ definitions:
         type: "string"
       profileImage:
         type: "string"
+        format: "uri"
       date:
         type: "integer"
         format: "int64"
+        example: 1614534839272
   User:
     type: "object"
     properties:
@@ -109,18 +112,27 @@ definitions:
         type: "string"
       password:
         type: "string"
+        format: "password"
       email:
         type: "string"
+        format: "email"
       name:
         type: "string"
       profileImage:
         type: "string"
+        foramt: "uri"
+    required:
+      - "username"
+      - "password"
+      - "email"
+      - "name"
   ReturnObj:
     type: "object"
     properties:
       date:
         type: "integer"
         format: "int64"
+        example: 1614534839272
       description:
         type: "string"
   ApiResponse:
