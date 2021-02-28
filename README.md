@@ -58,4 +58,4 @@ Before you start you may choose which package manager you want to use along the 
 In case you are using `yarn` don't forget to delete `package-lock.json`. (and likewise the other way with: `yarn.lock`)
 
 ## API documentation
-You can go to `http://localhost:8810/docs` and see all api docs written in swagger
+You can go to ["/docs"](http://localhost:8810/docs) when server is running, and see all api docs written in swagger
