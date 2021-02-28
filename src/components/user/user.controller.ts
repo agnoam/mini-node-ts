@@ -13,7 +13,7 @@ import md5 from 'md5';
 console.log("import app.controller");
 
 export module UserCtrl {
-    export function doPost_R(req: Request, res: Response): Response {
+    export function returnSomething_R(req: Request, res: Response): Response {
         return res.status(ResponseStatus.Ok).json({
             date: Date.now(),
             description: 'This is the date right now'

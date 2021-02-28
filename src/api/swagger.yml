@@ -1,0 +1,145 @@
+swagger: "2.0"
+info:
+  description: "Extreamly minimal node js server (express, ts, jest, db, swagger)"
+  version: "1.0.0"
+  title: "mini-node-ts"
+
+host: "localhost:8810"
+tags:
+  - name: "user"
+    description: "Operations about user"
+
+schemes:
+  - "http"
+
+paths:
+  /:
+    get:
+      summary: "Check server's avilablity"
+      responses:
+        "200":
+          description: "Response OK"
+          schema:
+            type: "string"
+            example: "server is running"
+  /users/login:
+    post:
+      tags:
+        - "user"
+      summary: "Logs user into the system"
+      operationId: "loginUser"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: User's username and password
+          required: true
+          schema:
+            $ref: "#/definitions/UserLoginObj"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/LoginResponseObj"
+        "400":
+          description: "Invalid username/password supplied"
+  /users/sign-up:
+    post:
+      tags:
+        - "user"
+      summary: "Signing up new user"
+      operationId: "signup-user"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: New user data
+          required: true
+          schema:
+            $ref: "#/definitions/User"
+      responses:
+        "200":
+          description: "User created successfuly"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        "500":
+          description: "There is a problem with creating the user"
+  /users/return-something:
+    get:
+      tags:
+        - "user"
+      summary: "Do something"
+      produces:
+        - "application/json"
+      responses:
+        "200": 
+          schema:
+            $ref: "#definitions/ReturnObj"
+definitions:
+  UserLoginObj:
+    type: "object"
+    required:
+      - "username"
+      - "password"
+    properties:
+      username:
+        type: "string"
+      password:
+        type: "string"
+  LoginResponseObj:
+    type: "object"
+    required:
+      - "name"
+      - "profileImage"
+      - "date"
+    properties:
+      name:
+        type: "string"
+      profileImage:
+        type: "string"
+      date:
+        type: "integer"
+        format: "int64"
+  User:
+    type: "object"
+    properties:
+      username:
+        type: "string"
+      password:
+        type: "string"
+      email:
+        type: "string"
+      name:
+        type: "string"
+      profileImage:
+        type: "string"
+  ReturnObj:
+    type: "object"
+    properties:
+      date:
+        type: "integer"
+        format: "int64"
+      description:
+        type: "string"
+  ApiResponse:
+    type: "object"
+    properties:
+      description:
+        type: "string"
+
+
+        
+# securityDefinitions:
+#   petstore_auth:
+#     type: "oauth2"
+#     authorizationUrl: "http://petstore.swagger.io/oauth/dialog"
+#     flow: "implicit"
+#     scopes:
+#       write:pets: "modify pets in your account"
+#       read:pets: "read your pets"
+#   api_key:
+#     type: "apiKey"
+#     name: "api_key"
+#     in: "header"

@@ -10,4 +10,4 @@ export const userRouter: Router = Router();
 userRouter
   .post('/login', UserCtrl.login_R)
   .post('/sign-up', UserCtrl.signUp_R)
-  .post('/post', UserCtrl.doPost_R);
+  .get('/return-something', UserCtrl.returnSomething_R);
