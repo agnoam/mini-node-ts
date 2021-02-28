@@ -7,6 +7,7 @@ Super minimal node.js (typescript) application with:
 * Mongodb (mongoose), 
 * Firebase (real-time database),
 * Socket.io
+* Swagger documentation
 
 And all of this with 100% typescript support
 
@@ -55,3 +56,6 @@ Before you start you may choose which package manager you want to use along the 
 
 #### For example:
 In case you are using `yarn` don't forget to delete `package-lock.json`. (and likewise the other way with: `yarn.lock`)
+
+## API documentation
+You can go to `http://localhost:8810/docs` and see all api docs written in swagger
