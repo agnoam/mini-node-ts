@@ -5,7 +5,7 @@ import YAML from 'js-yaml';
 import fs from 'fs';
 import path from 'path';
 
-const docPath: string = path.resolve(__dirname, '../api/swagger.yml');
+const docPath: string = path.resolve(__dirname, '../api/swagger.yaml');
 const swaggerDocument: Object = YAML.load(fs.readFileSync(docPath).toString()) as Object;
 
 console.log("import routes.config");

@@ -20,7 +20,7 @@ export module DBDriver {
       useUnifiedTopology: true,
       useNewUrlParser: true,
       useCreateIndex: true
-    },);
+    });
   }
 }
 
