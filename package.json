@@ -4,7 +4,7 @@
   "description": "Extreamly minimal node js server (express, ts, jest, db, swagger)",
   "main": "dist/server.js",
   "scripts": {
-    "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
+    "prebuild": "eslint --fix",
     "build": "tsc",
     "heroku-postbuild": "webpack",
     "production": "node dist/server.bundle.js",
