@@ -12,31 +12,22 @@ import socketIO from "socket.io";
 
 export module ServerBoot {
   const port: number = +process.env.PORT || 8810;
-  let app: Application;
-  export let server: Server;
-  export let io: SocketIO.Server;
+  let app: Application = express();
+  export let server: Server = createServer();
+  // Remove this if you does not want socket.io in your project
+  export let io: SocketIO.Server = getSocket(server);
 
-  export const initializeServer = (): void => {
-    app = express();
-    server = createServer();
-
-    // Remove this if you does not want socket.io in your project
-    io = getSocket(server); 
-
-    listen();
-  }
-
-  const createServer = (): Server => {
+  function createServer(): Server {
     return http.createServer(app);
   }
 
   /* If you don't need socket.io in your project delete this, 
     and don't forget to remove the `socket.io`, `@types/socket.io` dependencies */
-  const getSocket = (server: Server): socketIO.Server => {
+  function getSocket(server: Server): socketIO.Server {
     return socketIO.listen(server);
   }
 
-  const listen = (): void => {
+  export const listen = (): void => {
     loadMiddlewares();
     configModules();
     
@@ -92,4 +83,4 @@ interface NetworkInterface {
 }
 
 // Running the server
-ServerBoot.initializeServer();
+ServerBoot.listen();

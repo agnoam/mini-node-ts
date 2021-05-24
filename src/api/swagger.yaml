@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  description: "Extreamly minimal node js server (express, ts, jest, db, swagger)"
+  description: "Extreamly minimal node js server (Express, TypeScript, Jest, DB, Swagger)"
   version: "1.0.0"
   title: "mini-node-ts"
 
