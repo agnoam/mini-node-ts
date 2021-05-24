@@ -1,6 +1,5 @@
 
 /************* Moduls **************/
-import bodyParser from "body-parser";
 import express, { Application } from "express";
 import os from "os";
 import { ServerMiddleware } from "./middlewares/server.middleware";
@@ -47,8 +46,8 @@ export module ServerBoot {
   }
 
   const loadMiddlewares = (): void => {
-    app.use( bodyParser.json() );
-    app.use( bodyParser.urlencoded({ extended: true }) );
+    app.use( express.json() );
+    app.use( express.urlencoded({ extended: true }) );
     app.use( ServerMiddleware );
   }
 
