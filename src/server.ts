@@ -10,58 +10,58 @@ import http, { Server } from "http";
 import socketIO from "socket.io";
 // import { initializeFirebase } from './config/firebase.config';
 
-export class ServerBoot {
-  private readonly port: number = +process.env.PORT || 8810;
-  private app: Application;
-  public server: Server;
-  public io: SocketIO.Server;
+export module ServerBoot {
+  const port: number = +process.env.PORT || 8810;
+  let app: Application;
+  export let server: Server;
+  export let io: SocketIO.Server;
 
-  constructor() {
-    this.app = express();
-    this.server = this.createServer();
+  export const initializeServer = (): void => {
+    app = express();
+    server = createServer();
 
     // Remove this if you does not want socket.io in your project
-    this.io = this.getSocket(this.server); 
+    io = getSocket(server); 
 
-    this.listen();
+    listen();
   }
 
-  private createServer(): Server {
-    return http.createServer(this.app);
+  const createServer = (): Server => {
+    return http.createServer(app);
   }
 
   /* If you don't need socket.io in your project delete this, 
     and don't forget to remove the `socket.io`, `@types/socket.io` dependencies */
-  private getSocket(server: Server): socketIO.Server {
+  const getSocket = (server: Server): socketIO.Server => {
     return socketIO.listen(server);
   }
 
-  private listen(): void {
-    this.loadMiddlewares();
-    this.configModules();
+  const listen = (): void => {
+    loadMiddlewares();
+    configModules();
     
-    const localIP: string = this.findMyIP();
+    const localIP: string = findMyIP();
 
-    this.server.listen(this.port, () => {
-      console.log(`Our app server is running on http://${os.hostname()}:${this.port}`);
-      console.log(`Server running on: http://${localIP}:${this.port}`);
+    server.listen(port, () => {
+      console.log(`Our app server is running on http://${os.hostname()}:${port}`);
+      console.log(`Server running on: http://${localIP}:${port}`);
     });
   }
 
-  private configModules(): void {
+  const configModules = (): void => {
     DBDriver.connect();
     // initializeFirebase();
 
-    RoutesConfig(this.app);
+    RoutesConfig(app);
   }
 
-  private loadMiddlewares(): void {
-    this.app.use( bodyParser.json() );
-    this.app.use( bodyParser.urlencoded({ extended: true }) );
-    this.app.use( ServerMiddleware );
+  const loadMiddlewares = (): void => {
+    app.use( bodyParser.json() );
+    app.use( bodyParser.urlencoded({ extended: true }) );
+    app.use( ServerMiddleware );
   }
 
-  public findMyIP(): string {
+  export const findMyIP = (): string => {
     // Get the server's local ip
     const ifaces: NetworkInterface = os.networkInterfaces();
     let localIP: string;
@@ -92,4 +92,4 @@ interface NetworkInterface {
 }
 
 // Running the server
-const serverInstance: ServerBoot = new ServerBoot();
+ServerBoot.initializeServer();
