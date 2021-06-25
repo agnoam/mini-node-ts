@@ -16,11 +16,14 @@
         },
         {
             "type": "node",
-            "request": "attach",
-            "name": "Node: Nodemon",
-            "processId": "${command:PickProcess}",
-            "restart": true,
-            "protocol": "inspector"
+            "name": "Launch development server",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "runtimeExecutable": "yarn",
+            "runtimeArgs": [
+                "dev" // The name of the wanted script
+            ],
+            "port": 5858
         },
         {
             "name": "Jest Tests",
