@@ -1,3 +1,6 @@
+## 2.4.1 (09-07-2021)
+* Added `<component>.datalayer.ts` file architecture (description in `user.datalayer.ts`)
+
 ## 2.4.0 (30-07-2020)
 * Updated: Project archtecture updated to the New componenets architecture
 
