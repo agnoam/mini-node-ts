@@ -1,8 +1,8 @@
-FROM node:latest
+FROM node:alpine
 
 WORKDIR /usr/src/mini-node
 
-# Copy the project into /usr/src/file-validator folder
+# Copy the project into /usr/src/mini-node folder
 COPY . .
 # RUN rm -rf yarn.lock
 
@@ -19,6 +19,8 @@ RUN rm -rf README.md CHANGELOG.md app.json .gitignore
 
 RUN yarn --production
 
+# Expose port if needed (when using just in docker)
 # EXPOSE 3000
+
 WORKDIR /usr/src/mini-node/dist
 CMD ["yarn", "production"]
