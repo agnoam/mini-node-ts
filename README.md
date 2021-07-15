@@ -1,7 +1,9 @@
 # mini-node-ts
 Super minimal node.js (typescript) application with: 
 
-* Typescript
+* Docker
+* Typescript,
+* Express
 * Jest (testing), 
 * Nodemon, 
 * Mongodb (mongoose), 

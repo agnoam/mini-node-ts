@@ -5,9 +5,10 @@
   "main": "dist/server.js",
   "scripts": {
     "prebuild": "eslint --fix",
-    "build": "tsc",
+    "build": "tsc && yarn copy-files && webpack",
+    "copy-files": "cp -avr ./src/api ./dist/api",
     "heroku-postbuild": "webpack",
-    "production": "node dist/server.bundle.js",
+    "production": "node dist/code_bundle/server.bundle.js",
     "prestart": "npm run build",
     "start": "ts-node src/server.ts",
     "dev": "nodemon --inspect src/server.ts",
@@ -15,6 +16,9 @@
   },
   "author": "Noam Aghai",
   "license": "ISC",
+  "resolutions": {
+    "@types/serve-static": "1.13.9"
+  },
   "dependencies": {
     "dotenv": "8.2.0",
     "express": "4.17.1",
@@ -26,7 +30,8 @@
     "swagger-ui-express": "4.1.6"
   },
   "devDependencies": {
-    "@types/express": "^4.17.11",
+    "@types/express": "4.17.11",
+    "@types/express-serve-static-core": "4.17.0",
     "@types/jest": "24.0.12",
     "@types/js-yaml": "4.0.0",
     "@types/md5": "2.2.0",
@@ -34,6 +39,7 @@
     "@types/node": "12.0.0",
     "@types/socket.io": "2.1.10",
     "@types/swagger-ui-express": "4.1.2",
+    "eslint": "^7.30.0",
     "jest": "24.7.1",
     "nodemon": "2.0.2",
     "ts-jest": "24.0.2",

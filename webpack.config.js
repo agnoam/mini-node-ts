@@ -6,6 +6,9 @@ module.exports = {
     mode: 'production',
     target: 'node',
     externals: [ nodeExternals() ],
+    node: {
+        __dirname: false
+    },
     module: {
         rules: [
             { test: /\.ts$/, use: 'ts-loader' }
@@ -15,7 +18,7 @@ module.exports = {
         extensions: ['.ts', '.js', '.json']
     },
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'dist', 'code_bundle'),
         filename: 'server.bundle.js'
     }
 }
