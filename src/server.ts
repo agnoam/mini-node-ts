@@ -1,5 +1,3 @@
-
-/************* Moduls **************/
 import express, { Application } from "express";
 import os from "os";
 import { ServerMiddleware } from "./middlewares/server.middleware";
