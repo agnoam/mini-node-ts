@@ -1,18 +1,20 @@
+import "reflect-metadata"; // Used for dependcy-injection (inversify)
+
 import express, { Application } from "express";
 import os from "os";
 import { ServerMiddleware } from "./middlewares/server.middleware";
-import { RoutesConfig } from "./config/routes.config";
-import { DBDriver } from "./config/mongo.config";
+import { SwaggerConfig } from "./config/swagger.config";
 import http, { Server } from "http";
 import socketIO from "socket.io";
-// import { initializeFirebase } from './config/firebase.config';
+import { apm } from './config/apm.config';
 
 export module ServerBoot {
   const port: number = +process.env.PORT || 8810;
-  let app: Application = express();
-  export let server: Server = createServer();
+  export const app: Application = express(); // Exported for testings
+  export const server: Server = createServer();
+  
   // Remove this if you does not want socket.io in your project
-  export let io: SocketIO.Server = getSocket(server);
+  export const io: SocketIO.Server = getSocket(server);
 
   function createServer(): Server {
     return http.createServer(app);
@@ -37,10 +39,7 @@ export module ServerBoot {
   }
 
   const configModules = (): void => {
-    DBDriver.connect();
-    // initializeFirebase();
-
-    RoutesConfig(app);
+    SwaggerConfig(app);
   }
 
   const loadMiddlewares = (): void => {
@@ -50,6 +49,8 @@ export module ServerBoot {
   }
 
   export const findMyIP = (): string => {
+    const span = apm.startSpan('Finding IP address');
+    
     // Get the server's local ip
     const ifaces: NetworkInterface = os.networkInterfaces();
     let localIP: string;
@@ -71,7 +72,8 @@ export module ServerBoot {
       });
     });
 
-    return localIP;
+    span?.end();
+    return localIP; 
   }
 } 
 

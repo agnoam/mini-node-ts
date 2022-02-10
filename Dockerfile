@@ -1,9 +1,10 @@
-FROM node:latest
+FROM node:slim
 
 WORKDIR /usr/src/mini-node
 
-# Copy the project into /usr/src/file-validator folder
+# Copy the project into /usr/src/mini-node folder
 COPY . .
+RUN rm -rf ./node_modules
 # RUN rm -rf yarn.lock
 
 # Building dist folder
@@ -19,6 +20,14 @@ RUN rm -rf README.md CHANGELOG.md app.json .gitignore
 
 RUN yarn --production
 
-# EXPOSE 3000
 WORKDIR /usr/src/mini-node/dist
+
+# Remove all not bundled files
+RUN rm -rf ./config ./components ./middlewares ./config ./utils
+RUN rm -rf ./server.js ./server.js.map
+
+# Clear cache of yarn
+RUN yarn cache clean
+
+EXPOSE 8810
 CMD ["yarn", "production"]
