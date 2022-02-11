@@ -9,7 +9,7 @@
         "outDir": "dist",
         "baseUrl": ".",
         "resolveJsonModule": true,
-        "types": ["reflect-metadata"],
+        "types": ["reflect-metadata", "jest", "node"],
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "paths": {
@@ -18,10 +18,10 @@
             ]
         }
     },
-    "exclude": [
-        "src/test/*"
-    ],
+    // "exclude": [
+    //     "src/test/*"
+    // ],
     "include": [
         "src/**/*"
-    ]
+, "test"    ]
 }

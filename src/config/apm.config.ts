@@ -6,7 +6,7 @@ dotenv.config();
 
 console.log('import apm.config');
 
-const startAPM = () => {
+const startAPM = () => {  
     console.log('Trying to start APM agent');
     
     if (!apm_instance.isStarted()) {

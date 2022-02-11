@@ -9,7 +9,7 @@ import path from 'path';
 const docPath: string = path.resolve(__dirname, '../api/swagger.yaml');
 const swaggerDocument: Object = YAML.load(fs.readFileSync(docPath).toString()) as Object;
 
-export const SwaggerConfig = (app: Application) => {
+export const SwaggerConfig = async (app: Application): Promise<void> => {
     const options = {
         controllers: __dirname,
         loglevel: 'debug',
@@ -18,44 +18,47 @@ export const SwaggerConfig = (app: Application) => {
     }
 
     const swaggerDoc = prepareSwaggerDoc(swaggerDocument);
-    swaggerTools.initializeMiddleware(swaggerDoc, (middleware) => {
-        // Interpret Swagger resouces and attach metadata to  request - must he first in swagger tools middleware chain
-        app.use(middleware.swaggerMetadata());
-        // app.use(morgan('combined'));
-
-        // validate swagger requests
-        app.use(middleware.swaggerValidator());
-
-        // CORS!!! and OPTIONS handler
-        // app.use((req, res, next) => {
-        //     res.setHeader('Access-Control-Allow-Origin', '*');
-        //     res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-        //     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, UseCamelCase, x-clientid, Authorization');
-
-        //     if (req.method === 'OPTIONS') {
-        //         res.statusCode = 200;
-        //         res.end();
-        //     } else {
-        //         next();
-        //     }
-        // });
-
-        // Route validated requests to appropriate controller
-        app.use(middleware.swaggerRouter(options));
-
-        // Serve the swagger documents and swagger ui
-        app.use(
-            middleware.swaggerUi({
-                // apiDocs: `${parsedURL.path}${serviceData.name}/api-docs`,
-                swaggerUi: '/docs'
-            })
-        );
-
-        // Start the server
-        // await probe.start(app, serverPort);
-        ProbeServer.readyFlag = true;
-        // logger.log('info', `your server is listening on port ${serverPort} http://${swaggerDoc.host}`);
-        // logger.log('info', `Swagger-ui is available on http://${swaggerDoc.host}/docs`);
+    return new Promise( (resolve, reject) => {
+        swaggerTools.initializeMiddleware(swaggerDoc, (middleware) => {
+            // Interpret Swagger resouces and attach metadata to  request - must he first in swagger tools middleware chain
+            app.use(middleware.swaggerMetadata());
+            // app.use(morgan('combined'));
+    
+            // validate swagger requests
+            app.use(middleware.swaggerValidator());
+    
+            // CORS!!! and OPTIONS handler
+            // app.use((req, res, next) => {
+            //     res.setHeader('Access-Control-Allow-Origin', '*');
+            //     res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+            //     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, UseCamelCase, x-clientid, Authorization');
+    
+            //     if (req.method === 'OPTIONS') {
+            //         res.statusCode = 200;
+            //         res.end();
+            //     } else {
+            //         next();
+            //     }
+            // });
+    
+            // Route validated requests to appropriate controller
+            app.use(middleware.swaggerRouter(options));
+    
+            // Serve the swagger documents and swagger ui
+            app.use(
+                middleware.swaggerUi({
+                    // apiDocs: `${parsedURL.path}${serviceData.name}/api-docs`,
+                    swaggerUi: '/docs'
+                })
+            );
+    
+            // Start the server
+            // await probe.start(app, serverPort);
+            ProbeServer.readyFlag = true;
+            // logger.log('info', `your server is listening on port ${serverPort} http://${swaggerDoc.host}`);
+            // logger.log('info', `Swagger-ui is available on http://${swaggerDoc.host}/docs`);
+            resolve();
+        });
     });
 }
 

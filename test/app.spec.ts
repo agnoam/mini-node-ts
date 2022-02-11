@@ -1,12 +1,19 @@
+import { ServerBoot } from '../src/server';
+import { Application } from 'express';
 import request, { Response } from 'supertest';
-import { ServerBoot } from './../server';
-
-let app: any;
 
 describe('Routes tests', () => {
+    let app: Application;
+
     beforeAll(async () => {
         process.env.NODE_ENV = 'test';
         app = ServerBoot.app;
+        console.log('beforeAll:', app);
+    });
+
+    afterAll(() => {
+        ServerBoot.server.close();
+        console.log('Closing server');
     });
 
     test('Always true test', () => {
@@ -18,7 +25,9 @@ describe('Routes tests', () => {
     });
 
     test('Request mocking test', async () => {
-        const res: Response = await request(app).get('/');
-        expect(res.body).toHaveProperty('description', 'date');
+        const res: Response = await request(app).get('/users/test');
+        console.log(res.body);
+        expect(res.body).toHaveProperty('description');
+        expect(res.body).toHaveProperty('date');
     });
 });

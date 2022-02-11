@@ -6,27 +6,27 @@ import { ServerMiddleware } from "./middlewares/server.middleware";
 import { SwaggerConfig } from "./config/swagger.config";
 import http, { Server } from "http";
 import socketIO from "socket.io";
-import { apm } from './config/apm.config';
+// import { apm } from './config/apm.config';
 
 export module ServerBoot {
   const port: number = +process.env.PORT || 8810;
   export const app: Application = express(); // Exported for testings
   export const server: Server = createServer();
   
-  // Remove this if you does not want socket.io in your project
+  // TODO: Remove this if you does not want socket.io in your project
   export const io: SocketIO.Server = getSocket(server);
 
   function createServer(): Server {
     return http.createServer(app);
   }
 
-  /* If you don't need socket.io in your project delete this, 
+  /* TODO: If you don't need socket.io in your project delete this, 
     and don't forget to remove the `socket.io`, `@types/socket.io` dependencies */
   function getSocket(server: Server): socketIO.Server {
     return socketIO.listen(server);
   }
 
-  export const listen = (): void => {
+  export const listen = (): Application => {
     loadMiddlewares();
     configModules();
     
@@ -36,6 +36,8 @@ export module ServerBoot {
       console.log(`Our app server is running on http://${os.hostname()}:${port}`);
       console.log(`Server running on: http://${localIP}:${port}`);
     });
+
+    return app;
   }
 
   const configModules = (): void => {
@@ -49,7 +51,7 @@ export module ServerBoot {
   }
 
   export const findMyIP = (): string => {
-    const span = apm.startSpan('Finding IP address');
+    // const span = apm.startSpan('Finding IP address');
     
     // Get the server's local ip
     const ifaces: NetworkInterface = os.networkInterfaces();
@@ -72,7 +74,7 @@ export module ServerBoot {
       });
     });
 
-    span?.end();
+    // span?.end();
     return localIP; 
   }
 } 

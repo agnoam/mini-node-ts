@@ -36,7 +36,7 @@ paths:
         "200":
           description: "Request ran successfuly"
           schema:
-            $ref: "#/definition/UserTestResult"
+            $ref: "#/definitions/UserTestResult"
 
   # /users/login:
   #   post:
