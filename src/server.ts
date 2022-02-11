@@ -6,7 +6,7 @@ import { ServerMiddleware } from "./middlewares/server.middleware";
 import { SwaggerConfig } from "./config/swagger.config";
 import http, { Server } from "http";
 import socketIO from "socket.io";
-// import { apm } from './config/apm.config';
+import { apm } from './config/apm.config';
 
 export module ServerBoot {
   const port: number = +process.env.PORT || 8810;
@@ -51,7 +51,7 @@ export module ServerBoot {
   }
 
   export const findMyIP = (): string => {
-    // const span = apm.startSpan('Finding IP address');
+    const span = apm.startSpan('Finding IP address');
     
     // Get the server's local ip
     const ifaces: NetworkInterface = os.networkInterfaces();
@@ -74,7 +74,7 @@ export module ServerBoot {
       });
     });
 
-    // span?.end();
+    span?.end();
     return localIP; 
   }
 } 
