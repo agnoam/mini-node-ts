@@ -9,16 +9,19 @@
         "outDir": "dist",
         "baseUrl": ".",
         "resolveJsonModule": true,
+        "types": ["reflect-metadata", "jest", "node"],
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
         "paths": {
             "*": [
                 "node_modules/*"
             ]
         }
     },
-    "exclude": [
-        "src/test/*"
-    ],
+    // "exclude": [
+    //     "src/test/*"
+    // ],
     "include": [
         "src/**/*"
-    ]
+, "test"    ]
 }

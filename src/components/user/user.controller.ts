@@ -1,24 +1,52 @@
+import { apm } from '../../config/apm.config';
 import { Request, Response } from "express";
 import { ResponseStatus } from "../../utils/consts";
-import { UserModel, IUser, InputUserData } from './user.model';
+import { IUser, InputUserData } from './user.model';
 import { UserDataLayer } from "./user.datalayer";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../../config/di.types.config";
 
 console.log("import app.controller");
 
-export module UserCtrl {
-    export function returnSomething_R(req: Request, res: Response): Response {
+@injectable()
+export class UserCtrl {
+    constructor(@inject(TYPES.UserDataLayer) private userDataLayer: UserDataLayer) {}
+
+    test_R(req: Request, res: Response): Response {
+        const transaction = apm.startTransaction('some_test');
+        
+        console.log('running something...');
+        this.someFunc(transaction);
+        
+        transaction.end();
+
         return res.status(ResponseStatus.Ok).json({
             date: Date.now(),
             description: 'This is the date right now'
         });
     }
 
-    export async function login_R(req: Request, res: Response): Promise<Response> {
+    private someFunc(transaction) {
+        const span = transaction.startSpan();
+        console.log('someFunc');
+
+        for (let i = 0; i < 1000; i++) {
+            // calculating something
+            i ** 2;
+        }
+
+        span.end();
+    }
+
+    async login_R(req: Request, res: Response): Promise<Response> {
+        const transaction = apm.startTransaction('User login request');
         const reqBody: LoginRequestBody = req.body as LoginRequestBody;
+        
         if (reqBody.username && reqBody.password) {
             // Encrypting the password with md5
-            const userData: IUser = await UserDataLayer.isLegit(reqBody.username, reqBody.password);
+            const userData: IUser = await this.userDataLayer.isLegit(reqBody.username, reqBody.password);
             if(userData) {
+                transaction.end();
                 return res.status(ResponseStatus.Ok).json({
                     name: userData.name,
                     profileImage: userData.profileImage,
@@ -27,12 +55,14 @@ export module UserCtrl {
             }
         }
 
+        transaction.end();
         return res.status(ResponseStatus.BadRequest).json({
             description: 'Request must have username and password fields in body'
         });
     }
 
-    export async function signUp_R(req: Request, res: Response): Promise<Response> {
+    async signUp_R(req: Request, res: Response): Promise<Response> {
+        const transaction = apm.startTransaction('Signing up new user');
         const userData: InputUserData = {
             username: req.body.username,
             password: req.body.password,
@@ -46,32 +76,39 @@ export module UserCtrl {
             !userData.profileImage ? delete userData.profileImage : undefined;
 
             try {
-                UserDataLayer.createNewUser(userData);
+                this.userDataLayer.createNewUser(userData);
+                transaction.end();
                 return res.status(ResponseStatus.Ok).json({ description: 'User created successfuly' });
             } catch(ex) {
                 console.error('MongoDB creation ex: ', ex);
+                apm.captureError(ex);
             }
         }
 
+        transaction.end();
         return res.status(ResponseStatus.InternalError).json({ description: 'Operation failed, please try again' });
     }
 
-    export async function deleteUser_R(req: Request, res: Response): Promise<Response> {
+    async deleteUser_R(req: Request, res: Response): Promise<Response> {
+        const transaction = apm.startTransaction('User delete request');
         const userData: LoginRequestBody = req.body;
 
         try {
-            if(await UserDataLayer.isLegit(userData.username, userData.password)) {
-                UserDataLayer.deleteUser(userData.username);
+            if(await this.userDataLayer.isLegit(userData.username, userData.password)) {
+                this.userDataLayer.deleteUser(userData.username);
+                transaction.end();
                 return res.status(ResponseStatus.Ok).json({
                     description: 'User deleted successfuly'
                 });
             }
             
+            transaction.end();
             return res.status(ResponseStatus.Ok).json({ 
                 description: 'User credentials is not accurte, Please change and try again'
             });
         } catch(ex) {
             console.error(ex);
+            apm.captureError(ex);
             return res.status(ResponseStatus.InternalError).json({
                 description: 'There was an error, User delete did not happened'
             });
