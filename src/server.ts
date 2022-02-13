@@ -1,30 +1,32 @@
+import "reflect-metadata"; // Used for dependcy-injection (inversify)
+
 import express, { Application } from "express";
 import os from "os";
 import { ServerMiddleware } from "./middlewares/server.middleware";
-import { RoutesConfig } from "./config/routes.config";
-import { DBDriver } from "./config/mongo.config";
+import { SwaggerConfig } from "./config/swagger.config";
 import http, { Server } from "http";
 import socketIO from "socket.io";
-// import { initializeFirebase } from './config/firebase.config';
+import { apm } from './config/apm.config';
 
 export module ServerBoot {
   const port: number = +process.env.PORT || 8810;
-  let app: Application = express();
-  export let server: Server = createServer();
-  // Remove this if you does not want socket.io in your project
-  export let io: SocketIO.Server = getSocket(server);
+  export const app: Application = express(); // Exported for testings
+  export const server: Server = createServer();
+  
+  // TODO: Remove this if you does not want socket.io in your project
+  export const io: SocketIO.Server = getSocket(server);
 
   function createServer(): Server {
     return http.createServer(app);
   }
 
-  /* If you don't need socket.io in your project delete this, 
+  /* TODO: If you don't need socket.io in your project delete this, 
     and don't forget to remove the `socket.io`, `@types/socket.io` dependencies */
   function getSocket(server: Server): socketIO.Server {
     return socketIO.listen(server);
   }
 
-  export const listen = (): void => {
+  export const listen = (): Application => {
     loadMiddlewares();
     configModules();
     
@@ -34,13 +36,12 @@ export module ServerBoot {
       console.log(`Our app server is running on http://${os.hostname()}:${port}`);
       console.log(`Server running on: http://${localIP}:${port}`);
     });
+
+    return app;
   }
 
   const configModules = (): void => {
-    DBDriver.connect();
-    // initializeFirebase();
-
-    RoutesConfig(app);
+    SwaggerConfig(app);
   }
 
   const loadMiddlewares = (): void => {
@@ -50,6 +51,8 @@ export module ServerBoot {
   }
 
   export const findMyIP = (): string => {
+    const span = apm.startSpan('Finding IP address');
+    
     // Get the server's local ip
     const ifaces: NetworkInterface = os.networkInterfaces();
     let localIP: string;
@@ -71,7 +74,8 @@ export module ServerBoot {
       });
     });
 
-    return localIP;
+    span?.end();
+    return localIP; 
   }
 } 
 

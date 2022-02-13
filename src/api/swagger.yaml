@@ -14,7 +14,9 @@ schemes:
 
 paths:
   /:
+    x-swagger-router-controller: routes.config
     get:
+      operationId: defaultRoute
       summary: "Check server's avilablity"
       responses:
         "200":
@@ -22,61 +24,75 @@ paths:
           schema:
             type: "string"
             example: "server is running"
-  /users/login:
-    post:
-      tags:
-        - "user"
-      summary: "Logs user into the system"
-      operationId: "loginUser"
-      produces:
-        - "application/json"
-      parameters:
-        - in: "body"
-          name: "body"
-          description: User's username and password
-          required: true
-          schema:
-            $ref: "#/definitions/UserLoginObj"
-      responses:
-        "200":
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/LoginResponseObj"
-        "400":
-          description: "Invalid username/password supplied"
-  /users/sign-up:
-    post:
-      tags:
-        - "user"
-      summary: "Signing up new user"
-      operationId: "signup-user"
-      produces:
-        - "application/json"
-      parameters:
-        - in: "body"
-          name: "body"
-          description: New user data
-          required: true
-          schema:
-            $ref: "#/definitions/User"
-      responses:
-        "200":
-          description: "User created successfuly"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-        "500":
-          description: "There is a problem with creating the user"
-  /users/return-something:
+
+  /users/test:
+    x-swagger-router-controller: routes.config
     get:
-      tags:
-        - "user"
-      summary: "Do something"
+      operationId: testRequest
+      summary: Test request for checking the user component, don't forget to change it or delete it
       produces:
         - "application/json"
       responses:
-        "200": 
+        "200":
+          description: "Request ran successfuly"
           schema:
-            $ref: "#definitions/ReturnObj"
+            $ref: "#/definitions/UserTestResult"
+
+  # /users/login:
+  #   post:
+  #     tags:
+  #       - "user"
+  #     summary: "Logs user into the system"
+  #     operationId: "loginUser"
+  #     produces:
+  #       - "application/json"
+  #     parameters:
+  #       - in: "body"
+  #         name: "body"
+  #         description: User's username and password
+  #         required: true
+  #         schema:
+  #           $ref: "#/definitions/UserLoginObj"
+  #     responses:
+  #       "200":
+  #         description: "successful operation"
+  #         schema:
+  #           $ref: "#/definitions/LoginResponseObj"
+  #       "400":
+  #         description: "Invalid username/password supplied"
+  # /users/sign-up:
+  #   post:
+  #     tags:
+  #       - "user"
+  #     summary: "Signing up new user"
+  #     operationId: "signup-user"
+  #     produces:
+  #       - "application/json"
+  #     parameters:
+  #       - in: "body"
+  #         name: "body"
+  #         description: New user data
+  #         required: true
+  #         schema:
+  #           $ref: "#/definitions/User"
+  #     responses:
+  #       "200":
+  #         description: "User created successfuly"
+  #         schema:
+  #           $ref: "#/definitions/ApiResponse"
+  #       "500":
+  #         description: "There is a problem with creating the user"
+  # /users/return-something:
+  #   get:
+  #     tags:
+  #       - "user"
+  #     summary: "Do something"
+  #     produces:
+  #       - "application/json"
+  #     responses:
+  #       "200": 
+  #         schema:
+  #           $ref: "#definitions/ReturnObj"
 definitions:
   UserLoginObj:
     type: "object"
@@ -105,27 +121,37 @@ definitions:
         type: "integer"
         format: "int64"
         example: 1614534839272
-  User:
+  UserTestResult:
     type: "object"
     properties:
-      username:
+      description:
         type: "string"
-      password:
-        type: "string"
-        format: "password"
-      email:
-        type: "string"
-        format: "email"
-      name:
-        type: "string"
-      profileImage:
-        type: "string"
-        foramt: "uri"
-    required:
-      - "username"
-      - "password"
-      - "email"
-      - "name"
+        example: 'Current date:'
+      date:
+        type: "integer"
+        format: "int64"
+        example: 1644516162021
+  # User:
+  #   type: "object"
+  #   properties:
+  #     username:
+  #       type: "string"
+  #     password:
+  #       type: "string"
+  #       format: "password"
+  #     email:
+  #       type: "string"
+  #       format: "email"
+  #     name:
+  #       type: "string"
+  #     profileImage:
+  #       type: "string"
+  #       foramt: "uri"
+  #   required:
+  #     - "username"
+  #     - "password"
+  #     - "email"
+  #     - "name"
   ReturnObj:
     type: "object"
     properties:

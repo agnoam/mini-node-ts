@@ -1,22 +1,17 @@
-import { Application, Request, Response } from "express";
-import { userRouter } from '../components/user/user.routes';
-import swaggerUi from 'swagger-ui-express';
-import YAML from 'js-yaml';
-import fs from 'fs';
-import path from 'path';
+import { Request, Response, NextFunction } from "express";
 
-const docPath: string = path.resolve(__dirname, '../api/swagger.yaml');
-const swaggerDocument: Object = YAML.load(fs.readFileSync(docPath).toString()) as Object;
+import { container } from './di.config';
+import { TYPES } from "./di.types.config";
+
+import { UserCtrl } from './../components/user/user.controller';
+
+const userCtrl: UserCtrl = container.get(TYPES.UserCtrl);
 
 console.log("import routes.config");
 
-export const RoutesConfig = (app: Application) => {
-    // Define the api to where go
-    app
-        .use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
-        .use('/users', userRouter)
-
-        .get('/', (req: Request, res: Response) => {
-            res.send('node-ts server is running ;)');
-        });
+// This file exposes all wanted BLOC (Business logic) functions implemntation to the `swagger.yaml`
+export const defaultRoute = (req: Request, res: Response, next: NextFunction): Response => {
+    return res.send('node-ts server is running ;) (by swagger router)');
 }
+
+export const testRequest = (req: Request, res: Response, next: NextFunction) => userCtrl.test_R(req, res);
