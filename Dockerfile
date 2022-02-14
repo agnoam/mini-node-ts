@@ -17,6 +17,7 @@ RUN rm -rf docker-compose.yml Dockerfile
 RUN rm -rf jest.config.js webpack.config.json nodemon.json
 RUN rm -rf .eslintrc.json tsconfig.json
 RUN rm -rf README.md CHANGELOG.md app.json .gitignore
+RUN rm -rf ./test
 
 RUN yarn --production
 
@@ -30,4 +31,4 @@ RUN rm -rf ./server.js ./server.js.map
 RUN yarn cache clean
 
 EXPOSE 8810
-CMD ["yarn", "production"]
+CMD ["yarn", "start"]
