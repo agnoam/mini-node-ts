@@ -1,9 +1,6 @@
 import { Document, Model, model, Schema, HookNextFunction } from "mongoose";
 import { CollectionsNames } from "../../utils/consts";
 
-import dotenv from 'dotenv';
-dotenv.config();
-
 export interface IUser extends InputUserData, Document {}
 export interface InputUserData {
     email: string;

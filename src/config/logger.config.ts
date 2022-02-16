@@ -13,7 +13,7 @@ export module LoggerConfig {
                 format: winston.format.combine(
                     winston.format.colorize({ message: true }),
                     debugFormat({
-                        colorizeMessage: false, // Already colored by `winston.format.colorize`.
+                        colorizeMessage: false // Already colored by `winston.format.colorize`.
                     })
                 )
             }),

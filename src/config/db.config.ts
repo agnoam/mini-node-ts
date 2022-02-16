@@ -1,7 +1,7 @@
 import { injectable } from "inversify";
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { Delete, Index, Search, Update } from "@elastic/elasticsearch/api/requestParams";
-import { ApiResponse, TransportRequestOptions, TransportRequestPromise } from "@elastic/elasticsearch/lib/Transport";
+import { ApiResponse, TransportRequestOptions } from "@elastic/elasticsearch/lib/Transport";
 
 const defaultClientParams: IConnectionParams = {
     node: [process.env.ELASTICSEARCH_HOSTS] || ['http://localhost:9200']
@@ -15,7 +15,7 @@ export class DbDriver implements IDbDriver {
         this.connect();
     }
 
-    connect(connectionParams?: IConnectionParams) {
+    connect(connectionParams?: IConnectionParams): void {
         if (!this.client) {
             this.client = new Client({ ...defaultClientParams, ...connectionParams });
         }

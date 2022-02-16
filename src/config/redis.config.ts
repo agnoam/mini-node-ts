@@ -2,9 +2,6 @@ import { injectable } from 'inversify';
 import redis, { RedisClient } from 'redis';
 import { promisify } from 'util';
 
-import dotenv from 'dotenv';
-dotenv.config();
-
 @injectable()
 export class RedisConfig {
     private redisClient: RedisClient;
