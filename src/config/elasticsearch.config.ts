@@ -1,7 +1,4 @@
 import { Client, RequestParams } from '@elastic/elasticsearch';
-import { RequestBody } from '@elastic/elasticsearch/lib/Transport';
-import dotenv from 'dotenv';
-dotenv.config();
 
 console.log('import elasticsearch.config');
 

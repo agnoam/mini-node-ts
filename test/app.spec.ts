@@ -1,4 +1,5 @@
 import { ServerBoot } from '../src/server';
+
 import { Application } from 'express';
 import request, { Response } from 'supertest';
 
@@ -7,7 +8,8 @@ describe('Routes tests', () => {
 
     beforeAll(async () => {
         process.env.NODE_ENV = 'test';
-        app = ServerBoot.app;
+        app = await ServerBoot.listen();
+        
         console.log('beforeAll:', app);
     });
 

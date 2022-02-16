@@ -1,9 +1,6 @@
 import apm_instance from 'elastic-apm-node';
 import packageJSON from '../../package.json';
 
-import dotenv from 'dotenv';
-dotenv.config();
-
 console.log('import apm.config');
 
 const startAPM = () => {  

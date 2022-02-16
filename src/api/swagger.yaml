@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   description: "Extreamly minimal node js server (Express, TypeScript, Jest, DB, Swagger)"
-  version: "1.0.0"
+  version: "1.0.0" 
   title: "mini-node-ts"
 
 host: "localhost:8810"
@@ -131,27 +131,6 @@ definitions:
         type: "integer"
         format: "int64"
         example: 1644516162021
-  # User:
-  #   type: "object"
-  #   properties:
-  #     username:
-  #       type: "string"
-  #     password:
-  #       type: "string"
-  #       format: "password"
-  #     email:
-  #       type: "string"
-  #       format: "email"
-  #     name:
-  #       type: "string"
-  #     profileImage:
-  #       type: "string"
-  #       foramt: "uri"
-  #   required:
-  #     - "username"
-  #     - "password"
-  #     - "email"
-  #     - "name"
   ReturnObj:
     type: "object"
     properties:
