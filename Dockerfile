@@ -27,8 +27,10 @@ WORKDIR /usr/src/mini-node/dist
 RUN rm -rf ./config ./components ./middlewares ./config ./utils
 RUN rm -rf ./server.js ./server.js.map
 
+WORKDIR /usr/src/mini-node
+
 # Clear cache of yarn
 RUN yarn cache clean
 
 EXPOSE 8810
-CMD ["yarn", "start"]
+CMD ["yarn", "production"]

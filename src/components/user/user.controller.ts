@@ -5,6 +5,7 @@ import { IUser, InputUserData } from './user.model';
 import { UserDataLayer } from "./user.datalayer";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../config/di.types.config";
+import { Transaction, Span } from 'elastic-apm-node';
 
 console.log("import app.controller");
 
@@ -13,7 +14,7 @@ export class UserCtrl {
     constructor(@inject(TYPES.UserDataLayer) private userDataLayer: UserDataLayer) {}
 
     test_R(req: Request, res: Response): Response {
-        const transaction = apm.startTransaction('some_test');
+        const transaction: Transaction = apm.startTransaction('some_test');
         
         console.log('running something...');
         this.someFunc(transaction);
@@ -26,8 +27,8 @@ export class UserCtrl {
         });
     }
 
-    private someFunc(transaction) {
-        const span = transaction.startSpan();
+    private someFunc(transaction: Transaction): void {
+        const span: Span = transaction.startSpan();
         console.log('someFunc');
 
         for (let i = 0; i < 1000; i++) {
@@ -62,7 +63,7 @@ export class UserCtrl {
     }
 
     async signUp_R(req: Request, res: Response): Promise<Response> {
-        const transaction = apm.startTransaction('Signing up new user');
+        const transaction: Transaction = apm.startTransaction('Signing up new user');
         const userData: InputUserData = {
             username: req.body.username,
             password: req.body.password,
@@ -90,11 +91,11 @@ export class UserCtrl {
     }
 
     async deleteUser_R(req: Request, res: Response): Promise<Response> {
-        const transaction = apm.startTransaction('User delete request');
+        const transaction: Transaction = apm.startTransaction('User delete request');
         const userData: LoginRequestBody = req.body;
 
         try {
-            if(await this.userDataLayer.isLegit(userData.username, userData.password)) {
+            if (await this.userDataLayer.isLegit(userData.username, userData.password)) {
                 this.userDataLayer.deleteUser(userData.username);
                 transaction.end();
                 return res.status(ResponseStatus.Ok).json({

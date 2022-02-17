@@ -24,15 +24,6 @@
                 "dev" // The name of the wanted script
             ],
             "port": 5858
-        },
-        {
-            "name": "Jest Tests",
-            "type": "node",
-            "request": "launch",
-            "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
-            "args": ["test","--runInBand","-i"],
-            "outFiles": ["${workspaceRoot}/dist/**/*"],
-            "cwd": "${workspaceFolder}"
         }
     ]
 }

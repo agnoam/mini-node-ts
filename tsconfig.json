@@ -12,17 +12,14 @@
         "types": ["reflect-metadata", "jest", "node"],
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
+        "skipLibCheck": true,
         "paths": {
             "*": [
                 "node_modules/*"
             ]
         }
     },
-    // "exclude": [
-    //     "src/test/*"
-    // ],
     "include": [
-        "src/**/*", 
-        // "test/**/*"
+        "src/**/*"
     ]
 }

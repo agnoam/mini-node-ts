@@ -19,15 +19,15 @@ export module ETCDConfig {
     const createClient = (connectionOptions?: IETCDOptions): void => {
         if (!client) {
             client = new Etcd3(connectionOptions);
-            console.log('Client created');
+            console.log('ETCD client has been created');
         }
     }
 
     /**
-     * @description
+     * @description Initialization of `process.env` variable with the data came from the ETCD
      * 
-     * @param connectionOptions 
-     * @param configs 
+     * @param connectionOptions ETCD connection options
+     * @param configs Configurations for the `process.env` setting
      */
     export const initialize = async (connectionOptions: IETCDOptions, configs: IETCDConfigurations): Promise<void> => {
         try {
@@ -47,9 +47,9 @@ export module ETCDConfig {
 
 
     /**
-     * @description
-     * @param propertyName 
-     * @returns 
+     * @description Getting the setting of an property declared in @IETCDConfigurations if exists
+     * @param propertyName Wanted property name
+     * @returns The settings in case they exist
      */
     const getPropertySetting = (propertyName: string): IETCDPropertySetting => {
         if (typeof _configs.envParams[propertyName] !== "object")

@@ -4,11 +4,13 @@ import express, { Application } from "express";
 import os from "os";
 import socketIO from "socket.io";
 import http, { Server } from "http";
+import { Span } from 'elastic-apm-node';
 
 import { ETCDConfig } from "./config/etcd.config";
 import { ServerMiddleware } from "./middlewares/server.middleware";
 import { SwaggerConfig } from "./config/swagger.config";
 import { apm } from './config/apm.config';
+import { LoggerConfig } from "./config/logger.config";
 
 export module ServerBoot {
 	const port: number = +process.env.PORT || 8810;
@@ -34,6 +36,8 @@ export module ServerBoot {
 				ELASTIC_APM_SERVER_URL: 'test'
 			}
 		});
+		LoggerConfig.initialize();
+		LoggerConfig.logger.error('test', {meta: 123}, ['abcd']);
 
 		console.log('ELASTIC_APM_SERVER_URL:', process.env.ELASTIC_APM_SERVER_URL);
 		
@@ -61,7 +65,7 @@ export module ServerBoot {
 	}
 
 	export const findMyIP = (): string => {
-		const span = apm.startSpan('Finding IP address');
+		const span: Span = apm.startSpan('Finding IP address');
 		
 		// Get the server's local ip
 		const ifaces: NetworkInterface = os.networkInterfaces();
