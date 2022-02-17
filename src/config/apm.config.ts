@@ -1,9 +1,9 @@
-import apm_instance from 'elastic-apm-node';
+import apm_instance, { Agent } from 'elastic-apm-node';
 import packageJSON from '../../package.json';
 
 console.log('import apm.config');
 
-const startAPM = () => {  
+const startAPM = (): Agent => {  
     console.log('Trying to start APM agent');
     
     if (!apm_instance.isStarted()) {
@@ -21,4 +21,4 @@ const startAPM = () => {
     return apm_instance;
 }
 
-export const apm = startAPM();
+export const apm: Agent = startAPM();
