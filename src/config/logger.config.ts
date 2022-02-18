@@ -1,30 +1,28 @@
-import winston, { Logger } from 'winston';
+import winston from 'winston';
 import debugFormat from 'winston-format-debug';
-import { ElasticsearchTransport } from 'winston-elasticsearch';
-import { ElasticSerachConfig } from './elasticsearch.config';
+// import { ElasticsearchTransport } from 'winston-elasticsearch';
+// import { ElasticSerachConfig } from './elasticsearch.config';
 
 console.log('import logger.config');
 
-export module LoggerConfig {
-    export let logger: Logger;
-    
+export let Logger: winston.Logger;
+
+export module LoggerConfig {   
     export const initialize = (configs?: ILoggerInitProps): void => {
-        if (!logger) {
-            logger = winston.createLogger({
+        if (!Logger) {
+            Logger = winston.createLogger({
                 level: 'info',
                 format: winston.format.json(),
                 defaultMeta: configs?.defaultMetadata || { service: 'non-set-service-name', version: '-1.0.0' },
                 transports: [
                     // process.env.NODE_ENV !== 'production' ?
-                        new winston.transports.Console({
-                            format: winston.format.combine(
-                                winston.format.timestamp(),
-                                winston.format.colorize({ message: true }),
-                                // winston.format.printf((info) => {
-
-                                // })
-                            )
-                        })
+                    new winston.transports.Console({
+                        format: winston.format.combine(
+                            winston.format.timestamp(),
+                            winston.format.colorize({ message: true, all: true }),
+                            winston.format.printf((info: any) => `${info.timestamp} - ${info.level}: ${info.message}` + ` ${info?.args || ''}`)
+                        )
+                    })
                     // : undefined,
                     // new ElasticsearchTransport({
                     //     indexPrefix: `${configs.serviceName}-logs`,
@@ -39,12 +37,12 @@ export module LoggerConfig {
     }
 
     const overrideConsole = () => {
-        if (!logger) throw 'Can not override console without an initialized logger';
+        if (!Logger) throw 'Can not override console without an initialized logger';
 
-        console.log = (message?: any, ...optionalParams: any[]) => logger.info(message, ...optionalParams);
-        console.debug = (message?: any, ...optionalParams: any[]) => logger.debug(message, ...optionalParams);
-        console.warn = (message?: any, ...optionalParams: any[]) => logger.warn(message, ...optionalParams);
-        console.error = (message?: any, ...optionalParams: any[]) => logger.error(message, ...optionalParams);
+        console.log = (message?: any, ...optionalParams: any[]) => Logger.info(message, ...optionalParams);
+        console.debug = (message?: any, ...optionalParams: any[]) => Logger.debug(message, ...optionalParams);
+        console.warn = (message?: any, ...optionalParams: any[]) => Logger.warn(message, ...optionalParams);
+        console.error = (message?: any, ...optionalParams: any[]) => Logger.error(message, ...optionalParams);
     }
 }
 

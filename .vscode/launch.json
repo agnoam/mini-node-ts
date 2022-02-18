@@ -10,6 +10,7 @@
             "name": "Launch Program",
             "program": "${workspaceFolder}/dist/code_bundle/server.bundle.js",
             "preLaunchTask": "build: production",
+            "outputCapture": "std",
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"
             ]
@@ -23,6 +24,7 @@
             "runtimeArgs": [
                 "dev" // The name of the wanted script
             ],
+            "outputCapture": "std",
             "port": 5858
         }
     ]
