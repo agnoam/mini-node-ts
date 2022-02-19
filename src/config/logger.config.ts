@@ -1,6 +1,4 @@
-import { logger } from 'elastic-apm-node';
 import winston, { Logform } from 'winston';
-import debugFormat from 'winston-format-debug';
 // import { ElasticsearchTransport } from 'winston-elasticsearch';
 // import { ElasticSerachConfig } from './elasticsearch.config';
 
