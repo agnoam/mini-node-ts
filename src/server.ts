@@ -54,8 +54,6 @@ export module ServerBoot {
 		APMConfig.initializeAPM();
 
 		// TODO: Remove after testings
-		console.log('ELASTIC_APM_SERVER_URL:', process.env.ELASTIC_APM_SERVER_URL);
-		console.log('is logger exists ?', !!Logger);
 		Logger.error('test', { 1: 'abcd' });
 	}
 
