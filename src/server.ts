@@ -11,6 +11,7 @@ import { ETCDConfig } from "./config/etcd.config";
 import { ServerMiddleware } from "./middlewares/server.middleware";
 import { SwaggerConfig } from "./config/swagger.config";
 import { LoggerConfig, Logger } from "./config/logger.config";
+import MorganMiddleware from './middlewares/morgan.middleware';
 
 export module ServerBoot {
 	const port: number = +process.env.PORT || 8810;
@@ -53,14 +54,14 @@ export module ServerBoot {
 		LoggerConfig.initialize();
 		APMConfig.initializeAPM();
 
-		// TODO: Remove after testings
-		Logger.error('test', { 1: 'abcd' });
+		Logger.info('Configurations initialized successfuly');
 	}
 
 	const loadMiddlewares = async (): Promise<void> => {
 		app.use( express.json() );
 		app.use( express.urlencoded({ extended: true }) );
 		app.use( ServerMiddleware );
+		app.use( MorganMiddleware );
 
 		await SwaggerConfig(app);
 	}

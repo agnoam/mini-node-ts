@@ -25,7 +25,7 @@ export module LoggerConfig {
                                 winston.format.printf((info) => {
                                     let out: string = `${info.timestamp} [${info.service}, ` +
                                     `${info.version}] ${info.level}: ${info.message} ` + 
-                                    `${Object.keys(info.metadata) ? JSON.stringify(info.metadata) : ''}`;
+                                    `${Object.keys(info?.metadata).length ? JSON.stringify(info.metadata) : ''}`;
                                     
                                     if (info.metadata.error) {
                                         out = `${out} ${info.metadata.error}`;
