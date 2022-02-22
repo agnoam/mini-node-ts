@@ -6,11 +6,12 @@ import socketIO from "socket.io";
 import http, { Server } from "http";
 import { Span } from 'elastic-apm-node';
 
+import { APMConfig, apm } from './config/apm.config';
 import { ETCDConfig } from "./config/etcd.config";
 import { ServerMiddleware } from "./middlewares/server.middleware";
 import { SwaggerConfig } from "./config/swagger.config";
-import { apm } from './config/apm.config';
-import { LoggerConfig } from "./config/logger.config";
+import { LoggerConfig, Logger } from "./config/logger.config";
+import MorganMiddleware from './middlewares/morgan.middleware';
 
 export module ServerBoot {
 	const port: number = +process.env.PORT || 8810;
@@ -31,18 +32,8 @@ export module ServerBoot {
 	}
 
 	export const listen = async (): Promise<Application> => {
-		await ETCDConfig.initialize({ hosts: 'http://localhost:5000' }, { 
-			envParams: {
-				ELASTIC_APM_SERVER_URL: 'test'
-			}
-		});
-		LoggerConfig.initialize();
-		LoggerConfig.logger.error('test', {meta: 123}, ['abcd']);
-
-		console.log('ELASTIC_APM_SERVER_URL:', process.env.ELASTIC_APM_SERVER_URL);
-		
-		loadMiddlewares();
-		await configModules();
+		await initializeConfigs();
+		await loadMiddlewares();
 		
 		const localIP: string = findMyIP();
 		return new Promise( (resolve, reject) => {
@@ -54,14 +45,26 @@ export module ServerBoot {
 		});
 	}
 
-	const configModules = async (): Promise<void> => {
-		await SwaggerConfig(app);
+	const initializeConfigs = async (): Promise<void> => {
+		await ETCDConfig.initialize({ hosts: 'http://localhost:5000' }, { 
+			envParams: {
+				ELASTIC_APM_SERVER_URL: 'test'
+			}
+		});
+		LoggerConfig.initialize();
+		APMConfig.initializeAPM();
+
+		console.log('Configurations initialized successfuly', 12, { abcd: 1234 });
+		Logger.info('Configurations initialized successfuly', 12, { abcd: 1234 });
 	}
 
-	const loadMiddlewares = (): void => {
+	const loadMiddlewares = async (): Promise<void> => {
 		app.use( express.json() );
 		app.use( express.urlencoded({ extended: true }) );
+		app.use( MorganMiddleware );
 		app.use( ServerMiddleware );
+
+		await SwaggerConfig(app);
 	}
 
 	export const findMyIP = (): string => {

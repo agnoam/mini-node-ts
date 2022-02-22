@@ -6,6 +6,7 @@ import { UserDataLayer } from "./user.datalayer";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../config/di.types.config";
 import { Transaction, Span } from 'elastic-apm-node';
+import { Logger } from '../../config/logger.config';
 
 console.log("import app.controller");
 
@@ -21,6 +22,7 @@ export class UserCtrl {
         
         transaction.end();
 
+        Logger.error('test_R() executed');
         return res.status(ResponseStatus.Ok).json({
             date: Date.now(),
             description: 'This is the date right now'
