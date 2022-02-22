@@ -54,14 +54,15 @@ export module ServerBoot {
 		LoggerConfig.initialize();
 		APMConfig.initializeAPM();
 
-		Logger.info('Configurations initialized successfuly');
+		console.log('Configurations initialized successfuly', 12, { abcd: 1234 });
+		Logger.info('Configurations initialized successfuly', 12, { abcd: 1234 });
 	}
 
 	const loadMiddlewares = async (): Promise<void> => {
 		app.use( express.json() );
 		app.use( express.urlencoded({ extended: true }) );
-		app.use( ServerMiddleware );
 		app.use( MorganMiddleware );
+		app.use( ServerMiddleware );
 
 		await SwaggerConfig(app);
 	}
