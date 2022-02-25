@@ -22,7 +22,7 @@ export class UserCtrl {
         
         transaction.end();
 
-        Logger.error('test_R() executed');
+        Logger.info('test_R() executed');
         return res.status(ResponseStatus.Ok).json({
             date: Date.now(),
             description: 'This is the date right now'

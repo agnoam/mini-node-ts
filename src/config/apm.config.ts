@@ -3,7 +3,6 @@ import packageJSON from '../../package.json';
 
 console.log('import apm.config');
 
-
 export let apm: Agent;
 export module APMConfig {
     export const initializeAPM = (): void => {  
@@ -16,7 +15,7 @@ export module APMConfig {
                 serviceName: process.env.ELASTIC_APM_SERVICE_NAME || packageJSON.name,
                 serviceVersion: packageJSON.version,
                 serverUrl: process.env.ELASTIC_APM_SERVER_URL || 'http://localhost:8200',
-                environment: process.env.NODE_ENV || 'development'
+                environment: process.env.NODE_ENV || 'Development'
             });
         }
     
