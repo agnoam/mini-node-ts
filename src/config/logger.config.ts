@@ -1,12 +1,20 @@
 import winston, { Logform } from 'winston';
-// import { ElasticsearchTransport } from 'winston-elasticsearch';
-// import { ElasticSerachConfig } from './elasticsearch.config';
+import { ElasticsearchTransport } from 'winston-elasticsearch';
+
+import packageJSON from '../../package.json';
+import { ElasticSerachConfig } from './elasticsearch.config';
+import { apm } from './apm.config';
 
 console.log('import logger.config');
 
 export let Logger: winston.Logger;
 
-export module LoggerConfig {   
+export module LoggerConfig {  
+    const _defaultMetadata: IMetadata = { 
+        service: process.env.LOGGER_SERVICE_NAME || packageJSON.name, 
+        version: process.env.LOGGER_SERVICE_VERSION || packageJSON.version 
+    }
+    
     export const initialize = (configs?: ILoggerInitProps): void => {
         if (!Logger) {
             const colorizer: Logform.Colorizer = winston.format.colorize();
@@ -18,10 +26,16 @@ export module LoggerConfig {
                 debug: 'orange'
             });
 
+            const elasticTransport: ElasticsearchTransport = new ElasticsearchTransport({
+                indexPrefix: `${configs?.serviceName || _defaultMetadata.service}-logs`,
+                apm: apm,
+                client: ElasticSerachConfig.elasticClient
+            });
+
             Logger = winston.createLogger({
                 level: 'http',
                 format: winston.format.json(),
-                defaultMeta: configs?.defaultMetadata || { service: 'non-set-service-name', version: '-1.0.0' },
+                defaultMeta: configs?.defaultMetadata || _defaultMetadata,
                 transports: [
                     process.env.NODE_ENV !== 'production' ?
                         new winston.transports.Console({
@@ -47,14 +61,17 @@ export module LoggerConfig {
                             )
                         })
                     : undefined,
-                    // new ElasticsearchTransport({
-                    //     indexPrefix: `${configs.serviceName}-logs`,
-                    //     client: ElasticSerachConfig.elasticClient
-                    // })
+                    elasticTransport
                 ]
             });
 
-            // overrideConsole();
+            Logger.on('error', (error) => {
+                console.error('Error in logger caught', error);
+            });
+            elasticTransport.on('error', (error) => {
+                console.error('Error in winston-elasticsearch caught', error);
+            });
+
             Logger.info('Logger has been created');
         }
     }
@@ -94,7 +111,7 @@ export module LoggerConfig {
         return formattedStr;
     }
 
-    function formatJSON(obj_from_json: Object): string {
+    const formatJSON = (obj_from_json: Object): string => {
         if (typeof obj_from_json !== "object" || Array.isArray(obj_from_json)){
             // not an object, stringify using native function
             return JSON.stringify(obj_from_json);
@@ -122,4 +139,9 @@ export module LoggerConfig {
 export interface ILoggerInitProps {
     serviceName?: string;
     defaultMetadata?: Object;
+}
+
+interface IMetadata {
+    service: string;
+    version: string;
 }

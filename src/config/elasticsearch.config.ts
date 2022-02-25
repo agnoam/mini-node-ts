@@ -88,6 +88,7 @@ export module ElasticSerachConfig {
         maxRetries: +process.env.ELASTICSEARCH_MAX_RETRIES,
         requestTimeout: +process.env.ELASTICSEARCH_REQUEST_TIMEOUT
     });
+    console.log('Elasticsearch client created');
     
     const logsMappings = {
         // [index-name]: Elasticsearch mapping object
