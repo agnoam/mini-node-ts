@@ -6,8 +6,8 @@ import socketIO from "socket.io";
 import http, { Server } from "http";
 import { Span } from 'elastic-apm-node';
 
-import { APMConfig, apm } from './config/apm.config';
 import { ETCDConfig } from "./config/etcd.config";
+import { APMConfig, apm } from './config/apm.config';
 import { ServerMiddleware } from "./middlewares/server.middleware";
 import { SwaggerConfig } from "./config/swagger.config";
 import { LoggerConfig, Logger } from "./config/logger.config";
@@ -48,14 +48,15 @@ export module ServerBoot {
 	const initializeConfigs = async (): Promise<void> => {
 		await ETCDConfig.initialize({ hosts: 'http://localhost:5000' }, { 
 			envParams: {
-				ELASTIC_APM_SERVER_URL: 'test'
+				ELASTIC_APM_SERVER_URL: 'test',
+				MONGODB_URI: { defaultValue: undefined, etcdPath: 'mongodb_uri' },
+				ELASTICSEARCH_URI: undefined
 			}
 		});
 		LoggerConfig.initialize();
 		APMConfig.initializeAPM();
 
-		console.log('Configurations initialized successfuly', 12, { abcd: 1234 });
-		Logger.info('Configurations initialized successfuly', 12, { abcd: 1234 });
+		Logger.info('Configurations initialized successfuly');
 	}
 
 	const loadMiddlewares = async (): Promise<void> => {

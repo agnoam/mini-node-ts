@@ -69,10 +69,13 @@ export module ETCDConfig {
             
             // Checking the etcd entry exists. in case it does it will be set, else it will be the defaultValue
             const val = await client.get(etcdEntryName).string();
-            const strDefaultVal: string = _configs.envParams[propertyName].toString();
-            process.env[propertyName] = val || propertySetting?.defaultValue || strDefaultVal;
+            const strDefaultVal: string | null | undefined = _configs.envParams[propertyName] !== '[object Object]' ? 
+                _configs.envParams[propertyName]?.toString() : undefined;
+            
+            process.env[propertyName] = val || propertySetting?.defaultValue || strDefaultVal || process.env[propertyName];
+            console.log(`process.env[${propertyName}]:`, process.env[propertyName]);
 
-            if (!val) await client.put(etcdEntryName).value(propertySetting?.defaultValue);
+            if (!val) await client.put(etcdEntryName).value(process.env[propertyName]);
         }
     }
 }
@@ -83,8 +86,8 @@ interface IETCDSettings {
 }
 
 interface IETCDPropertySetting {
-    etcdPath?: string;
-    defaultValue?: string;
+    etcdPath: string;
+    defaultValue: string;
 }
 
 export interface IETCDConfigurations {
