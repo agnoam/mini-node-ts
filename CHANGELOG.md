@@ -1,3 +1,7 @@
+## 2.5.0 (08-03-2022)
+* Added: `ETCDConfig` with etcd environment variables loading including watchers
+* Updated: `README.md` file
+
 ## 2.4.1 (09-07-2021)
 * Added `<component>.datalayer.ts` file architecture (description in `user.datalayer.ts`)
 

@@ -13,6 +13,9 @@ import { SwaggerConfig } from "./config/swagger.config";
 import { LoggerConfig, Logger } from "./config/logger.config";
 import MorganMiddleware from './middlewares/morgan.middleware';
 
+import dotenv from 'dotenv';
+dotenv.config();
+
 export module ServerBoot {
 	const port: number = +process.env.PORT || 8810;
 	export const app: Application = express(); // Exported for testings
@@ -46,11 +49,12 @@ export module ServerBoot {
 	}
 
 	const initializeConfigs = async (): Promise<void> => {
-		await ETCDConfig.initialize({ hosts: 'http://localhost:5000' }, { 
+		await ETCDConfig.initialize({ hosts: process.env.ETCD_HOST }, { 
+			configs: { genKeys: true, watchKeys: true, overrideSysObj: true },
 			envParams: {
 				ELASTIC_APM_SERVER_URL: 'test',
 				MONGODB_URI: { defaultValue: undefined, etcdPath: 'mongodb_uri' },
-				ELASTICSEARCH_URI: undefined
+				ELASTICSEARCH_URI: 'http://localhost:9200'
 			}
 		});
 		LoggerConfig.initialize();

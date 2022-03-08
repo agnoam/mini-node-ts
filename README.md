@@ -10,6 +10,10 @@ Super minimal node.js (typescript) application with:
 * Firebase (real-time database),
 * Socket.io
 * Swagger documentation
+* ETCD environment variables loading
+* Winston logger
+* Probe
+* Inversify dependency-injection
 
 And all of this with 100% typescript support
 
