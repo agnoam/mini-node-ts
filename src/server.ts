@@ -47,10 +47,11 @@ export module ServerBoot {
 
 	const initializeConfigs = async (): Promise<void> => {
 		await ETCDConfig.initialize({ hosts: 'http://localhost:5000' }, { 
+			configs: { genKeys: true, watchKeys: true, overrideSysObj: true },
 			envParams: {
 				ELASTIC_APM_SERVER_URL: 'test',
 				MONGODB_URI: { defaultValue: undefined, etcdPath: 'mongodb_uri' },
-				ELASTICSEARCH_URI: undefined
+				ELASTICSEARCH_URI: 'http://localhost:9200'
 			}
 		});
 		LoggerConfig.initialize();
