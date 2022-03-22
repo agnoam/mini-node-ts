@@ -7,10 +7,10 @@ import http, { Server } from "http";
 import { Span } from 'elastic-apm-node';
 
 import { ETCDConfig } from "./config/etcd.config";
+import { LoggerConfig, Logger } from "./config/logger.config";
 import { APMConfig, apm } from './config/apm.config';
 import { ServerMiddleware } from "./middlewares/server.middleware";
 import { SwaggerConfig } from "./config/swagger.config";
-import { LoggerConfig, Logger } from "./config/logger.config";
 import MorganMiddleware from './middlewares/morgan.middleware';
 
 import dotenv from 'dotenv';
@@ -41,8 +41,8 @@ export module ServerBoot {
 		const localIP: string = findMyIP();
 		return new Promise( (resolve, reject) => {
 			server.listen(port, () => {
-				console.log(`Our app server is running on http://${os.hostname()}:${port}`);
-				console.log(`Server running on: http://${localIP}:${port}`);
+				Logger.info(`Our app server is running on http://${os.hostname()}:${port}`);
+				Logger.info(`Server running on: http://${localIP}:${port}`);
 				resolve(app);
 			});
 		});
@@ -57,6 +57,7 @@ export module ServerBoot {
 				ELASTICSEARCH_URI: 'http://localhost:9200'
 			}
 		});
+		
 		LoggerConfig.initialize();
 		APMConfig.initializeAPM();
 

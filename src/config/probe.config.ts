@@ -1,6 +1,7 @@
 import { createTerminus, TerminusOptions } from '@godaddy/terminus';
 import { Server } from 'http';
 import { ResponseStatus } from '../utils/consts';
+import { Logger } from './logger.config';
 
 console.log('import probe.config');
 
@@ -28,7 +29,7 @@ export module ProbeServer {
         console.log("onSendFailureDuringShutdown, not implemented");
     }
 
-    const liveness = async (): Promise<any> => {
+    const liveness = (): Promise<void> => {
         console.log(`liveness probe = ${liveFlag}`);
         if (liveFlag) {
             return Promise.resolve();
@@ -38,7 +39,7 @@ export module ProbeServer {
         }
     }
 
-    const readiness = () => {
+    const readiness = (): Promise<void> => {
         console.log(`readiness probe = ${readyFlag}`);
         if (readyFlag) {
             return Promise.resolve();
@@ -48,7 +49,7 @@ export module ProbeServer {
         }
     }
 
-    export const initializeProbeServer = (server: Server) => {
+    export const initializeProbeServer = (server: Server): void => {
         process.on("uncaughtException", (err) => {
             console.error(`uncaughtException ${err}`);
             _errors.push(`uncaughtException ${err}`);
@@ -77,7 +78,7 @@ export module ProbeServer {
             onSignal,                         // [optional] cleanup function, returning a promise (used to be onSigterm)
             onShutdown,                       // [optional] called right before exiting
             onSendFailureDuringShutdown,      // [optional] called before sending each 503 during shutdowns
-            // logger                            // [optional] logger function to be called with errors. Example logger call: ('error happened during shutdown', error). See terminus.js for more details.
+            logger: (msg: string, err: Error) => Logger.error(msg, { err, tag: 'Terminus' }) // [optional] logger function to be called with errors. Example logger call: ('error happened during shutdown', error). See terminus.js for more details.
         }
         
         createTerminus(server, options)

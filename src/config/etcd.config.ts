@@ -51,9 +51,10 @@ export module ETCDConfig {
      */
     export const initialize = async (connectionOptions: IETCDOptions, configs: IETCDConfigurations): Promise<void> => {
         try {
-            if (!configs.configs.dirname) 
-                configs.configs.dirname = defaultConfigs.configs.dirname;
-
+            // if (!configs.configs.dirname) 
+            //     configs.configs.dirname = defaultConfigs.configs.dirname;
+            
+            configs.configs = { ...defaultConfigs.configs, ...configs.configs };
             _configs = { ...defaultConfigs, ...configs };
             createClient(connectionOptions);
             _etcdWatcher = client.watch();
@@ -110,16 +111,17 @@ export module ETCDConfig {
         
         _etcdWatcher.key(key).create().then((watcher: Watcher) => {
             watcher.on("put", (kv: IKeyValue, previous?: IKeyValue) => {
-                console.log('Updating the ')
+                console.log(`Updating the ${key} to:`, kv.value.toString());
                 updateEnv(propertyName, kv.value.toString());
             });
 
             watcher.on("delete", async (kv: IKeyValue, previous?: IKeyValue) => {
+                console.log(`Deleting param: ${propertyName} from envs`);
                 if (envParams)
-                    envParams[propertyName] = undefined;
+                    delete envParams[propertyName];
                 
                 if (_configs.configs?.overrideSysObj)
-                    process.env
+                    delete process.env[propertyName];
 
                 // In case the key deleted,
                 await watcher.cancel();
@@ -165,12 +167,14 @@ interface IETCDSettings {
     dirname?: string | Buffer;
     
     /**
-     * @description Generating the keys if not exists in etcd by the given `defaultValue`. default false 
+     * @description Generating the keys if not exists in etcd by the given `defaultValue`. 
+     * default false 
      */
     genKeys?: boolean;
 
     /**
-     * @description Override the `process.env.${key}` with the data gathered from etcd. Otherwise, env will be accessed by `ETCDConfig.envParams`
+     * @description Override the `process.env.${key}` with the data gathered from etcd. 
+     * Otherwise, env will be accessed by `ETCDConfig.envParams`
      */
     overrideSysObj?: boolean;
     
