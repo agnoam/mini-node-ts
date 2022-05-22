@@ -50,7 +50,7 @@ export module ServerBoot {
 
 	const initializeConfigs = async (): Promise<void> => {
 		await ETCDConfig.initialize({ hosts: process.env.ETCD_HOST }, { 
-			configs: { genKeys: true, watchKeys: true, overrideSysObj: true },
+			moduleConfigs: { genKeys: true, watchKeys: true, overrideSysObj: true },
 			envParams: {
 				ELASTIC_APM_SERVER_URL: 'test',
 				MONGODB_URI: { defaultValue: undefined, etcdPath: 'mongodb_uri' },
