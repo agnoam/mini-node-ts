@@ -1,13 +1,7 @@
 pipeline {
-    agent {
-        docker { image 'node:slim' }
-    }
+    agent any
 
     stages {
-        stage('Checkout') {
-            checkout scm
-        }
-
         stage('Test') {
             env.NODE_ENV = "test"
             print "NODE_ENV environment variable set to ${env.NODE_ENV}"
