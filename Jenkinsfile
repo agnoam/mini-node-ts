@@ -1,7 +1,9 @@
-node('node') {
-    currentBuild.result = "SUCCESS"
+pipeline {
+    agent {
+        docker { image 'node:slim' }
+    }
 
-    // try {
+    stages {
         stage('Checkout') {
             checkout scm
         }
@@ -18,5 +20,5 @@ node('node') {
         stage('Building Docker Image') {
             sh 'docker build .'
         }
-    // }
+    }
 }
