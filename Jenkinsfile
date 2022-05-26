@@ -3,8 +3,10 @@ pipeline {
 
     stages {
         stage('Test') {
-            env.NODE_ENV = "test"
-            print "NODE_ENV environment variable set to ${env.NODE_ENV}"
+            steps {
+                env.NODE_ENV = "test"
+                echo "NODE_ENV environment variable set to ${env.NODE_ENV}"
+            }
 
             // sh 'node -v'
             // sh 'yarn'
