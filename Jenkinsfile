@@ -1,7 +1,7 @@
 node('node') {
     currentBuild.result = "SUCCESS"
 
-    try {
+    // try {
         stage('Checkout') {
             checkout scm
         }
@@ -18,5 +18,5 @@ node('node') {
         stage('Building Docker Image') {
             sh 'docker build .'
         }
-    }
+    // }
 }
