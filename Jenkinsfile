@@ -9,9 +9,9 @@ pipeline {
         stage('Test') {
             steps {
                 echo "NODE_ENV environment variable set to ${env.NODE_ENV}"
+                sh 'node -v'
             }
 
-            // sh 'node -v'
             // sh 'yarn'
             // sh 'yarn test'
         }
