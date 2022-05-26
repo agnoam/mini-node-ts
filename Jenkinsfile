@@ -1,10 +1,13 @@
 pipeline {
     agent any
 
+    environment {
+        NODE_ENV = 'test'
+    }
+
     stages {
         stage('Test') {
             steps {
-                env.NODE_ENV = "test"
                 echo "NODE_ENV environment variable set to ${env.NODE_ENV}"
             }
 
