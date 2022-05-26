@@ -21,7 +21,7 @@
     "@elastic/elasticsearch": "7.16.0",
     "@godaddy/terminus": "^4.9.0",
     "dotenv": "8.2.0",
-    "elastic-apm-node": "^3.29.0",
+    "elastic-apm-node": "^3.33.0",
     "etcd3": "^1.1.0",
     "express": "4.17.1",
     "firebase-admin": "8.9.2",
@@ -34,7 +34,6 @@
     "reflect-metadata": "^0.1.13",
     "socket.io": "2.4.0",
     "swagger-tools": "^0.10.4",
-    "swagger-ui-express": "4.1.6",
     "winston": "^3.6.0",
     "winston-elasticsearch": "^0.16.1",
     "yarn": "^1.22.11"

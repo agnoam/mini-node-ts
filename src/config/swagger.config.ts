@@ -1,20 +1,22 @@
-import { Application } from "express";
-import swaggerTools from 'swagger-tools';
-import { ProbeServer } from "./probe.config";
+import { Application, Request, Response, NextFunction } from "express";
+import swaggerTools, { SwaggerRouter20Options } from 'swagger-tools';
 
 import YAML from 'js-yaml';
 import fs from 'fs';
 import path from 'path';
 
+import { ProbeServer } from "./probe.config";
+import { ResponseStatus } from "../utils/consts";
+
 const docPath: string = path.resolve(__dirname, '../api/swagger.yaml');
 const swaggerDocument: Object = YAML.load(fs.readFileSync(docPath).toString()) as Object;
 
 export const SwaggerConfig = async (app: Application): Promise<void> => {
-    const options = {
+    const options: SwaggerRouter20Options = {
         controllers: __dirname,
-        loglevel: 'debug',
-        strict: 'true',
-        useStabs: process.env.NODE_ENV === 'development', // Conditionally turn on stubs (mock mode)
+        // loglevel: 'debug',
+        // strict: 'true',
+        useStubs: process.env.NODE_ENV === 'development', // Conditionally turn on stubs (mock mode)
     }
 
     const swaggerDoc = prepareSwaggerDoc(swaggerDocument);
@@ -40,6 +42,14 @@ export const SwaggerConfig = async (app: Application): Promise<void> => {
             //         next();
             //     }
             // });
+
+            app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+                if (err) {
+                    res.status(ResponseStatus.BadRequest).json({ description: 'Internal error' });
+                } else {
+                    next();
+                }
+            });
     
             // Route validated requests to appropriate controller
             app.use(middleware.swaggerRouter(options));

@@ -21,13 +21,13 @@ dotenv.config();
  */
 export module ETCDConfig {
     let client: Etcd3 = null;
-    let _configs: IETCDConfigurations;
+    let proccesedConfigurations: IETCDConfigurations; // The configurations after merging with the user configs
     let _etcdWatcher: WatchBuilder = null;
     export let envParams: IEnvParams = null;
 
     const defaultConfigs: IETCDConfigurations = {
         envParams: {},
-        configs: {
+        moduleConfigs: {
             dirname: process.env.ETCD_SERVICE_NAME
         }
     }
@@ -36,31 +36,39 @@ export module ETCDConfig {
      * @description This function creates a client to be to communicate with the etcd server
      * @param connectionOptions Connection options by the etcd3 library
      */
-    const createClient = (connectionOptions?: IETCDOptions): void => {
+    function createClient(connectionOptions?: IETCDOptions): void {
         if (!client) {
             client = new Etcd3(connectionOptions);
             console.log('ETCD client has been created');
         }
     }
 
+    // Override the default configurations with those passed from the user  
+    function overrideDefaultConfigs(customConfigs: IETCDConfigurations): IETCDConfigurations {
+        customConfigs.moduleConfigs = { ...defaultConfigs.moduleConfigs, ...customConfigs.moduleConfigs };
+        const overwrittenObject = { ...defaultConfigs, ...customConfigs };
+
+        return overwrittenObject;
+    }
+
     /**
      * @description Initialization of `process.env` variable with the data came from the ETCD
      * 
      * @param connectionOptions ETCD connection options
-     * @param configs Configurations for the `process.env` setting
+     * @param userDefinedConfigs Custom configurations object
      */
-    export const initialize = async (connectionOptions: IETCDOptions, configs: IETCDConfigurations): Promise<void> => {
+    export async function initialize(
+        connectionOptions: IETCDOptions, 
+        userDefinedConfigs: IETCDConfigurations
+    ): Promise<void> {
         try {
-            if (!configs.configs.dirname) 
-                configs.configs.dirname = defaultConfigs.configs.dirname;
-
-            _configs = { ...defaultConfigs, ...configs };
+            proccesedConfigurations = overrideDefaultConfigs(userDefinedConfigs);
             createClient(connectionOptions);
             _etcdWatcher = client.watch();
 
-            if (!_configs.configs?.dirname) 
+            if (!proccesedConfigurations.moduleConfigs?.dirname) 
                 throw 'ETCD_SERVICE_NAME not found in environment variables';
-            if (!_configs?.envParams || !Object.keys(_configs?.envParams).length) 
+            if (!proccesedConfigurations?.envParams || !Object.keys(proccesedConfigurations?.envParams).length)
                 throw 'Configs arg does not contains any properties';
 
             await initializeProcess();
@@ -75,11 +83,11 @@ export module ETCDConfig {
      * @param propertyName Wanted property name
      * @returns The settings in case they exist
      */
-    const getPropertySetting = (propertyName: string): IETCDPropertySetting => {
-        if (typeof _configs.envParams[propertyName] !== "object")
+    function getPropertySetting(propertyName: string): IETCDPropertyDefenition {
+        if (typeof proccesedConfigurations.envParams[propertyName] !== "object")
             return undefined;
 
-        return _configs.envParams[propertyName] as IETCDPropertySetting;
+        return proccesedConfigurations.envParams[propertyName] as IETCDPropertyDefenition;
     }
 
 
@@ -89,8 +97,8 @@ export module ETCDConfig {
      * @param propertyName The propertyName to set in the variables
      * @param val The new value
      */
-    const updateEnv = (propertyName: string, val: any) => {
-        if (_configs.configs.overrideSysObj) {
+    function updateEnv(propertyName: string, val: any): void {
+        if (proccesedConfigurations.moduleConfigs.overrideSysObj) {
             console.log('Update new key in process.env');
             process.env[propertyName] = val;
         }
@@ -105,21 +113,22 @@ export module ETCDConfig {
      * @param key The key to watch
      * @param propertyName The propertyName to put in env (or `process.env`)
      */
-    const watchForChanges = (key: string | Buffer, propertyName: string): void => {
+    async function watchForChanges(key: string | Buffer, propertyName: string): Promise<void> {
         if (!_etcdWatcher) throw 'There is no ETCD client, initialization is required';
         
         _etcdWatcher.key(key).create().then((watcher: Watcher) => {
             watcher.on("put", (kv: IKeyValue, previous?: IKeyValue) => {
-                console.log('Updating the ')
+                console.log(`Updating the ${key} to:`, kv.value.toString());
                 updateEnv(propertyName, kv.value.toString());
             });
 
             watcher.on("delete", async (kv: IKeyValue, previous?: IKeyValue) => {
+                console.log(`Deleting param: ${propertyName} from envs`);
                 if (envParams)
-                    envParams[propertyName] = undefined;
+                    delete envParams[propertyName];
                 
-                if (_configs.configs?.overrideSysObj)
-                    process.env
+                if (proccesedConfigurations.moduleConfigs?.overrideSysObj)
+                    delete process.env[propertyName];
 
                 // In case the key deleted,
                 await watcher.cancel();
@@ -128,49 +137,54 @@ export module ETCDConfig {
     }
 
     /**
-     * @description Initializing `process.env` property keys
+     * @description Initializing `process.env` property keys, Checking for existence of the properties in the etcd.
+     * In case the property exists, set it in the `process.env` object.
      */
-    const initializeProcess = async (): Promise<void> => {
-        for (const propertyName of Object.keys(_configs?.envParams)) {
-            const propertySetting: IETCDPropertySetting = getPropertySetting(propertyName);
-            const generatedEtcdPath: string = `${_configs.configs.dirname}/${propertyName}`;
+     async function initializeProcess(): Promise<void> {
+        for (const propertyName of Object.keys(proccesedConfigurations?.envParams)) {
+            const propertySetting: IETCDPropertyDefenition = getPropertySetting(propertyName);
+            const generatedEtcdPath: string = `${proccesedConfigurations.moduleConfigs.dirname}/${propertyName}`;
             const etcdEntryName: string = propertySetting?.etcdPath || generatedEtcdPath;
             
             // Checking the etcd entry exists. in case it does it will be set, else it will be the defaultValue
-            const val = await client.get(etcdEntryName).string();
-            const strDefaultVal: string | null | undefined = _configs.envParams[propertyName] !== '[object Object]' ? 
-                _configs.envParams[propertyName]?.toString() : undefined;
+            const etcdVal = await client.get(etcdEntryName).string();
+            const strDefaultVal: string | null | undefined = proccesedConfigurations.envParams[propertyName] !== '[object Object]' ?
+                proccesedConfigurations.envParams[propertyName]?.toString() : undefined;
             
-            if (_configs.configs?.overrideSysObj) {
-                process.env[propertyName] = process.env[propertyName] || val || propertySetting?.defaultValue || strDefaultVal;
+            if (proccesedConfigurations.moduleConfigs?.overrideSysObj) {
+                process.env[propertyName] = etcdVal || process.env[propertyName] || propertySetting?.defaultValue || strDefaultVal;
                 console.log(`process.env[${propertyName}]:`, process.env[propertyName]);
-
-                if (!envParams) envParams = {};
-                envParams[propertyName] = process.env[propertyName] || val || propertySetting?.defaultValue || strDefaultVal;
-
-                if (_configs.configs?.watchKeys)
-                    watchForChanges(etcdEntryName, propertyName);
             }
 
-            if (!val && _configs.configs?.genKeys) 
+            if (!envParams) envParams = {};
+            envParams[propertyName] = etcdVal || process.env[propertyName] || propertySetting?.defaultValue || strDefaultVal;
+
+            if (proccesedConfigurations.moduleConfigs?.watchKeys) {
+                watchForChanges(etcdEntryName, propertyName);
+            }
+
+            if (!etcdVal && proccesedConfigurations.moduleConfigs?.genKeys) 
                 await client.put(etcdEntryName).value(process.env[propertyName]);
         }
     }
 }
 
-interface IETCDSettings {
+// Module configurations
+interface IETCDModuleConfigs {
     /**
      * @description The default "directory" (static-prefix) to search in keys, and save them
      */
     dirname?: string | Buffer;
     
     /**
-     * @description Generating the keys if not exists in etcd by the given `defaultValue`. default false 
+     * @description Generating the keys if not exists in etcd by the given `defaultValue`. 
+     * default false 
      */
     genKeys?: boolean;
 
     /**
-     * @description Override the `process.env.${key}` with the data gathered from etcd. Otherwise, env will be accessed by `ETCDConfig.envParams`
+     * @description Override the `process.env.${key}` with the data gathered from etcd. 
+     * Otherwise, env will be accessed by `ETCDConfig.envParams`
      */
     overrideSysObj?: boolean;
     
@@ -180,7 +194,7 @@ interface IETCDSettings {
     watchKeys?: boolean;
 }
 
-interface IETCDPropertySetting {
+interface IETCDPropertyDefenition {
     /**
      * @description Custom etcd path to retrive the value from
      */
@@ -193,10 +207,10 @@ interface IETCDPropertySetting {
 }
 
 export interface IETCDConfigurations {
-    configs?: IETCDSettings;
+    moduleConfigs?: IETCDModuleConfigs;
     envParams: {
         // If the value is string, it's the defaultValue
-        [propertyName: string]: IETCDPropertySetting | string;
+        [propertyName: string]: IETCDPropertyDefenition | string;
     }
 }
 
