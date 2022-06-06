@@ -1,7 +1,16 @@
-podTemplate {
+podTemplate(containers: [
+    containerTemplate(
+        name: 'node-agent', 
+        image: 'node:latest'
+    )
+]) {
     node(POD_LABEL) {
-        stage('Run shell') {
-            sh 'echo hello world'
+        stage('Test project') {
+            container('node-agent') {
+                stage('List all files') {
+                    sh ls
+                }
+            }
         }
     }
 }
