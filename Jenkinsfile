@@ -1,19 +1,27 @@
-podTemplate(containers: [
-    containerTemplate(
-        name: 'node-agent', 
-        image: 'node:latest'
-    )
-]) {
+podTemplate {
     node(POD_LABEL) {
-        stage('Test project') {
-            container('node-agent') {
-                stage('List all files') {
-                    sh ls
-                }
-            }
+        stage('Run shell') {
+            sh 'echo hello world'
         }
     }
 }
+
+// podTemplate(containers: [
+//     containerTemplate(
+//         name: 'node-agent', 
+//         image: 'node:latest'
+//     )
+// ]) {
+//     node(POD_LABEL) {
+//         stage('Test project') {
+//             container('node-agent') {
+//                 stage('List all files') {
+//                     sh ls
+//                 }
+//             }
+//         }
+//     }
+// }
 
 // pipeline {
 //     agent {
