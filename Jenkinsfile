@@ -1,37 +1,23 @@
-pipeline {
-    agent {
-        docker { image 'node:16.13.1-alpine' }
-    }
-    
-    stages {
-        stage('Test') {
-            steps {
-                sh 'node --version'
+podTemplate(containers: [
+    containerTemplate(name: 'node', image: 'node', command: 'sleep', args: '99d')
+]) {
+    node(POD_LABEL) {
+        container('node') {
+            // Pull the code from the git
+            git url: 'https://github.com/agnoam/mini-node-ts.git', branch: 'develop'
+            sh 'yarn'
+            
+            stage('Tests') {
+                sh 'yarn test'
+            }
+
+            stage('Build image') {
+                // Get the last image tag and increase it
+            }
+
+            stage('Publish to registry') {
+                // Push to docker-registry
             }
         }
     }
 }
-
-// pipeline {
-//     agent any
-
-//     environment {
-//         NODE_ENV = 'test'
-//     }
-
-//     stages {
-//         stage('Test') {
-//             steps {
-//                 echo "NODE_ENV environment variable set to ${env.NODE_ENV}"
-//                 sh 'node -v'
-//             }
-
-//             // sh 'yarn'
-//             // sh 'yarn test'
-//         }
-
-//         // stage('Building Docker Image') {
-//         //     sh 'docker build .'
-//         // }
-//     }
-// }
