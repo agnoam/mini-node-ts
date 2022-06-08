@@ -11,7 +11,7 @@ podTemplate(containers: [
                 sh 'yarn test'
             }
 
-            stage('Build image') {
+            stage('Build Docker image') {
                 // Get the last image tag and increase it
             }
 
