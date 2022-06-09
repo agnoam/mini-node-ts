@@ -11,13 +11,13 @@ podTemplate(containers: [
     containerTemplate(name: 'node', image: 'node', command: 'sleep', args: '99d'),
     containerTemplate(name: 'docker', image: 'docker:dind-rootless', command: 'sleep', args: '99d')
 ]) {
-    environment {
-        // Using configfile plugin to read external config file
-        configFileProvider([configFile(fileId: 'build-data', variable: 'GIT_REPO')]) {
-            ENV_GIT_REPO = $GIT_REPO
-            // ENV_REGISTRY_URL = 
-        }
-    }
+    // environment {
+    //     // Using configfile plugin to read external config file
+    //     configFileProvider([configFile(fileId: 'build-data', variable: 'GIT_REPO')]) {
+    //         ENV_GIT_REPO = $GIT_REPO
+    //         ENV_REGISTRY_URL = 
+    //     }
+    // }
 
     // Take random node from cluster, and deploy the given containers to a pod
     node(POD_LABEL) {
@@ -48,5 +48,8 @@ podTemplate(containers: [
         //         sh 'docker push $IMAGE_NAME'
         //     }
         // }
+
+        // Continus deployment in k8s
+        // stage('Deploy to kubernetes') {}
     }
 }
