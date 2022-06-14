@@ -6,7 +6,6 @@ import fs from 'fs';
 import path from 'path';
 
 import { ProbeServer } from "./probe.config";
-import { ResponseStatus } from "../utils/consts";
 
 const docPath: string = path.resolve(__dirname, '../api/swagger.yaml');
 const swaggerDocument: Object = YAML.load(fs.readFileSync(docPath).toString()) as Object;
@@ -28,28 +27,6 @@ export const SwaggerConfig = async (app: Application): Promise<void> => {
     
             // validate swagger requests
             app.use(middleware.swaggerValidator());
-    
-            // CORS!!! and OPTIONS handler
-            // app.use((req, res, next) => {
-            //     res.setHeader('Access-Control-Allow-Origin', '*');
-            //     res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-            //     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, UseCamelCase, x-clientid, Authorization');
-    
-            //     if (req.method === 'OPTIONS') {
-            //         res.statusCode = 200;
-            //         res.end();
-            //     } else {
-            //         next();
-            //     }
-            // });
-
-            app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-                if (err) {
-                    res.status(ResponseStatus.BadRequest).json({ description: 'Internal error' });
-                } else {
-                    next();
-                }
-            });
     
             // Route validated requests to appropriate controller
             app.use(middleware.swaggerRouter(options));
