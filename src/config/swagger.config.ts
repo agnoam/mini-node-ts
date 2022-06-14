@@ -1,4 +1,4 @@
-import { Application, Request, Response, NextFunction } from "express";
+import { Application } from "express";
 import { Options, Middleware } from 'oas-tools';
 import * as oasTools from 'oas-tools';
 
@@ -7,7 +7,6 @@ import fs from 'fs';
 import path from 'path';
 
 import { ProbeServer } from "./probe.config";
-import { ResponseStatus } from "../utils/consts";
 import { Logger } from './logger.config';
 
 const docPath: string = path.resolve(__dirname, '../api/swagger.yaml');
@@ -29,13 +28,6 @@ export const SwaggerConfig = async (app: Application): Promise<void> => {
 
             // Validate swagger requests
             app.use(middleware.swaggerValidator());
-
-            // Error handling
-            app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-                err ? 
-                    res.status(ResponseStatus.BadRequest).json({ description: 'Internal error' }) 
-                : next();
-            });
     
             // Route validated requests to appropriate controller
             app.use(middleware.swaggerRouter(options_object));

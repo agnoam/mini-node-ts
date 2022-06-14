@@ -12,6 +12,8 @@ import { APMConfig, apm } from './config/apm.config';
 import { ServerMiddleware } from "./middlewares/server.middleware";
 import { SwaggerConfig } from "./config/swagger.config";
 import MorganMiddleware from './middlewares/morgan.middleware';
+import ErrorMiddleware from "./middlewares/error.middleware";
+
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -50,7 +52,7 @@ export module ServerBoot {
 
 	const initializeConfigs = async (): Promise<void> => {
 		await ETCDConfig.initialize({ hosts: process.env.ETCD_HOST }, { 
-			configs: { genKeys: true, watchKeys: true, overrideSysObj: true },
+			moduleConfigs: { genKeys: true, watchKeys: true, overrideSysObj: true },
 			envParams: {
 				ELASTIC_APM_SERVER_URL: 'test',
 				MONGODB_URI: { defaultValue: undefined, etcdPath: 'mongodb_uri' },
@@ -67,6 +69,7 @@ export module ServerBoot {
 	const loadMiddlewares = async (): Promise<void> => {
 		app.use( express.json() );
 		app.use( express.urlencoded({ extended: true }) );
+		app.use( ErrorMiddleware );
 		app.use( MorganMiddleware );
 		app.use( ServerMiddleware );
 
