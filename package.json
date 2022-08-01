@@ -1,6 +1,6 @@
 {
   "name": "node-mini-app",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "Extreamly minimal node js server (express, ts, jest, db, swagger)",
   "main": "dist/server.js",
   "scripts": {
