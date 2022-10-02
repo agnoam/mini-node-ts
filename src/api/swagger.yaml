@@ -1,7 +1,7 @@
 openapi: "3.0.0"
 info:
   description: "Extreamly minimal node js server (Express, TypeScript, Jest, DB, Swagger)"
-  version: "1.0.0" 
+  version: "3.0.0" 
   title: "mini-node-ts"
 
 servers: 
@@ -12,7 +12,7 @@ tags:
 
 paths:
   /:
-    x-swagger-router-controller: routes.config
+    x-router-controller: routes.config
     get:
       operationId: defaultRoute
       summary: "Check server's avilablity"
@@ -21,7 +21,7 @@ paths:
           description: "Response OK"
 
   /users/test:
-    x-swagger-router-controller: routes.config
+    x-router-controller: routes.config
     get:
       operationId: testRequest
       summary: Test request for checking the user component, don't forget to change it or delete it

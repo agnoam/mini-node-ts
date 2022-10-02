@@ -1,28 +1,40 @@
-import { apm } from '../../config/apm.config';
 import { Request, Response } from "express";
+import { inject, injectable } from "inversify";
+import { Logger } from 'winston';
+import { Transaction, Span, Agent } from 'elastic-apm-node';
+
+import { TYPES } from "../../config/di.types.config";
+import { LoggerConfig } from '../../config/logger.config';
+import { APMConfig } from '../../config/apm.config';
 import { ResponseStatus } from "../../utils/consts";
 import { IUser, InputUserData } from './user.model';
 import { UserDataLayer } from "./user.datalayer";
-import { inject, injectable } from "inversify";
-import { TYPES } from "../../config/di.types.config";
-import { Transaction, Span } from 'elastic-apm-node';
-import { Logger } from '../../config/logger.config';
 
 console.log("import app.controller");
 
 @injectable()
 export class UserCtrl {
-    constructor(@inject(TYPES.UserDataLayer) private userDataLayer: UserDataLayer) {}
+    private apm: Agent;
+    private Logger: Logger;
+
+    constructor(
+        @inject(TYPES.APMConfig) apmConfig: APMConfig, 
+        @inject(TYPES.LoggerConfig) loggerConfig: LoggerConfig,
+        @inject(TYPES.UserDataLayer) private userDataLayer: UserDataLayer
+    ) {
+        this.apm = apmConfig.apm;
+        this.Logger = loggerConfig.Logger;
+    }
 
     test_R(req: Request, res: Response): Response {
-        const transaction: Transaction = apm.startTransaction('some_test');
+        const transaction: Transaction = this.apm.startTransaction('some_test');
         
         console.log('running something...');
         this.someFunc(transaction);
         
         transaction.end();
 
-        Logger.info('test_R() executed');
+        this.Logger.info('test_R() executed');
         return res.status(ResponseStatus.Ok).json({
             date: Date.now(),
             description: 'This is the date right now'
@@ -42,7 +54,7 @@ export class UserCtrl {
     }
 
     async login_R(req: Request, res: Response): Promise<Response> {
-        const transaction = apm.startTransaction('User login request');
+        const transaction = this.apm.startTransaction('User login request');
         const reqBody: LoginRequestBody = req.body as LoginRequestBody;
         
         if (reqBody.username && reqBody.password) {
@@ -65,7 +77,7 @@ export class UserCtrl {
     }
 
     async signUp_R(req: Request, res: Response): Promise<Response> {
-        const transaction: Transaction = apm.startTransaction('Signing up new user');
+        const transaction: Transaction = this.apm.startTransaction('Signing up new user');
         const userData: InputUserData = {
             username: req.body.username,
             password: req.body.password,
@@ -84,7 +96,7 @@ export class UserCtrl {
                 return res.status(ResponseStatus.Ok).json({ description: 'User created successfuly' });
             } catch(ex) {
                 console.error('MongoDB creation ex: ', ex);
-                apm.captureError(ex);
+                this.apm.captureError(ex);
             }
         }
 
@@ -93,7 +105,7 @@ export class UserCtrl {
     }
 
     async deleteUser_R(req: Request, res: Response): Promise<Response> {
-        const transaction: Transaction = apm.startTransaction('User delete request');
+        const transaction: Transaction = this.apm.startTransaction('User delete request');
         const userData: LoginRequestBody = req.body;
 
         try {
@@ -111,7 +123,7 @@ export class UserCtrl {
             });
         } catch(ex) {
             console.error(ex);
-            apm.captureError(ex);
+            this.apm.captureError(ex);
             return res.status(ResponseStatus.InternalError).json({
                 description: 'There was an error, User delete did not happened'
             });

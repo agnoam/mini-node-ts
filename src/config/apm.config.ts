@@ -1,17 +1,28 @@
+// import winston from 'winston';
+import { /* inject, */ injectable } from 'inversify';
 import apm_instance, { Agent } from 'elastic-apm-node';
-import { Logger } from '../config/logger.config';
+
+// import { LoggerConfig } from '../config/logger.config';
 import packageJSON from '../../package.json';
+// import { TYPES } from './di.types.config';
 
 console.log('import apm.config');
 
-export let apm: Agent;
-export module APMConfig {
-    export const initializeAPM = (): void => {  
-        Logger.info('Trying to start APM agent');
+@injectable()
+export class APMConfig {
+    // private Logger: winston.Logger;
+    apm: Agent;
+
+    // constructor(@inject(TYPES.LoggerConfig) loggerConfig: LoggerConfig) {
+    //     this.Logger = loggerConfig.Logger;
+    // }
+
+    public initializeAPM(): void {  
+        console.log('Trying to start APM agent');
         
         if (!apm_instance.isStarted()) {
-            Logger.info('Starting apm agent');
-            apm = apm_instance.start({
+            console.log('Starting apm agent');
+            this.apm = apm_instance.start({
                 frameworkVersion: process.version,
                 serviceName: process.env.ELASTIC_APM_SERVICE_NAME || packageJSON.name,
                 serviceVersion: packageJSON.version,
@@ -20,9 +31,9 @@ export module APMConfig {
             });
         }
     
-        if (!apm) {
-            Logger.info('Agent already running');
-            apm = apm_instance;
+        if (!this.apm) {
+            console.error('Agent already running');
+            this.apm = apm_instance;
         }
     }
 }

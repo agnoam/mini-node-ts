@@ -1,22 +1,35 @@
+import apm from 'elastic-apm-node';
+import { inject, injectable } from 'inversify';
 import winston, { Logform } from 'winston';
 import { ElasticsearchTransport } from 'winston-elasticsearch';
 
 import packageJSON from '../../package.json';
-import { ElasticSerachConfig } from './elasticsearch.config';
-import { apm } from './apm.config';
+import { APMConfig } from './apm.config';
+import { TYPES } from './di.types.config';
+// import { ElasticSerachConfig } from './elasticsearch.config';
 
 console.log('import logger.config');
 
-export let Logger: winston.Logger;
+@injectable()
+export class LoggerConfig {  
+    private _logger: winston.Logger;
+    private apm: apm.Agent;
 
-export module LoggerConfig {  
-    const _defaultMetadata: IMetadata = { 
+    private _defaultMetadata: IMetadata = { 
         service: process.env.LOGGER_SERVICE_NAME || packageJSON.name, 
         version: process.env.LOGGER_SERVICE_VERSION || packageJSON.version 
     }
     
-    export const initialize = (configs?: ILoggerInitProps): void => {
-        if (!Logger) {
+    get Logger(): winston.Logger {
+        return this._logger;
+    }
+
+    constructor(@inject(TYPES.APMConfig) apmConfig: APMConfig) {
+        this.apm = apmConfig.apm;
+    }
+
+    initialize(configs?: ILoggerInitProps): void {
+        if (!this.Logger) {
             const colorizer: Logform.Colorizer = winston.format.colorize();
             colorizer.addColors({
                 info: 'cyan',
@@ -26,16 +39,17 @@ export module LoggerConfig {
                 debug: 'orange'
             });
 
-            const elasticTransport: ElasticsearchTransport = new ElasticsearchTransport({
-                indexPrefix: `${configs?.serviceName || _defaultMetadata.service}-logs`,
-                apm: apm,
-                client: ElasticSerachConfig.elasticClient
-            });
+            // TODO: Add elasticsearch again
+            // const elasticTransport: ElasticsearchTransport = new ElasticsearchTransport({
+            //     indexPrefix: `${configs?.serviceName || this._defaultMetadata.service}-logs`,
+            //     apm: apm,
+            //     client: ElasticSerachConfig.elasticClient
+            // });
 
-            Logger = winston.createLogger({
+            this._logger = winston.createLogger({
                 level: 'http',
                 format: winston.format.json(),
-                defaultMeta: configs?.defaultMetadata || _defaultMetadata,
+                defaultMeta: configs?.defaultMetadata || this._defaultMetadata,
                 transports: [
                     process.env.NODE_ENV !== 'production' ?
                         new winston.transports.Console({
@@ -47,7 +61,7 @@ export module LoggerConfig {
                                 winston.format.printf((info) => {
                                     const splatKey: any = Symbol.for('splat');
                                     let out: string = `${info.timestamp} ` +
-                                    `[${info.service}, ${info.version}] ${info.level}: ${info.message} ` + formatMeta(info[splatKey]);
+                                    `[${info.service}, ${info.version}] ${info.level}: ${info.message} ` + this.formatMeta(info[splatKey]);
                                     
                                     if (info.metadata.error) {
                                         out = `${out} ${info.metadata.error}`;
@@ -61,18 +75,18 @@ export module LoggerConfig {
                             )
                         })
                     : undefined,
-                    elasticTransport
+                    // elasticTransport
                 ]
             });
 
-            Logger.on('error', (error) => {
+            this.Logger.on('error', (error) => {
                 console.error('Error in logger caught', error);
             });
-            elasticTransport.on('error', (error) => {
-                console.error('Error in winston-elasticsearch caught', error);
-            });
+            // elasticTransport.on('error', (error) => {
+            //     console.error('Error in winston-elasticsearch caught', error);
+            // });
 
-            Logger.info('Logger has been created');
+            this.Logger.info('Logger has been created');
         }
     }
 
@@ -81,7 +95,7 @@ export module LoggerConfig {
      * @param meta The meatadata object received from winston
      * @returns Formatted string
      */
-    const formatMeta = (meta: any[]): string => {
+    private formatMeta(meta: any[]): string {
         let formattedStr: string = '';
 
         if (!meta) return '';
@@ -98,7 +112,7 @@ export module LoggerConfig {
                 const json: string = Object.keys(variable).length > 1 ? 
                     JSON.stringify(variable, undefined, 2) 
                 : 
-                    formatJSON(variable);
+                    this.formatJSON(variable);
 
                 let formattedJson: string = json.replace(/"([^"]+)":/g, '$1:');
                 formattedStr += formattedJson;
@@ -111,7 +125,7 @@ export module LoggerConfig {
         return formattedStr;
     }
 
-    const formatJSON = (obj_from_json: Object): string => {
+    private formatJSON(obj_from_json: Object): string {
         if (typeof obj_from_json !== "object" || Array.isArray(obj_from_json)){
             // not an object, stringify using native function
             return JSON.stringify(obj_from_json);
@@ -120,19 +134,19 @@ export module LoggerConfig {
         // but without quotes around the keys.
         const props: string = Object
             .keys(obj_from_json)
-            .map(key => ` ${key}: ${formatJSON(obj_from_json[key])} `)
+            .map(key => ` ${key}: ${this.formatJSON(obj_from_json[key])} `)
             .join(",");
             
         return `{${props}}`;
     }
 
-    const overrideConsole = () => {
-        if (!Logger) throw 'Can not override console without an initialized logger';
+    private overrideConsole(): void {
+        if (!this.Logger) throw 'Can not override console without an initialized logger';
 
-        console.log = (message?: any, ...optionalParams: any[]) => Logger.info(message, ...optionalParams);
-        console.debug = (message?: any, ...optionalParams: any[]) => Logger.debug(message, ...optionalParams);
-        console.warn = (message?: any, ...optionalParams: any[]) => Logger.warn(message, ...optionalParams);
-        console.error = (message?: any, ...optionalParams: any[]) => Logger.error(message, ...optionalParams);
+        console.log = (message?: any, ...optionalParams: any[]) => this.Logger.info(message, ...optionalParams);
+        console.debug = (message?: any, ...optionalParams: any[]) => this.Logger.debug(message, ...optionalParams);
+        console.warn = (message?: any, ...optionalParams: any[]) => this.Logger.warn(message, ...optionalParams);
+        console.error = (message?: any, ...optionalParams: any[]) => this.Logger.error(message, ...optionalParams);
     }
 }
 

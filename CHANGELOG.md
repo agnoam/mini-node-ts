@@ -1,3 +1,7 @@
+## 3.0.0 (03-10-2022)
+* Added: Class support for server bootstrap
+* Added: Typings for `@oas-tools/core`
+
 ## 2.5.0 (08-03-2022)
 * Added: `ETCDConfig` with etcd environment variables loading including watchers
 * Updated: `README.md` file

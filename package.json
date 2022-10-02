@@ -1,6 +1,6 @@
 {
   "name": "node-mini-app",
-  "version": "2.6.0",
+  "version": "3.0.0",
   "description": "Extreamly minimal node js server (express, ts, jest, db, swagger)",
   "main": "dist/server.js",
   "scripts": {
@@ -20,6 +20,7 @@
   "dependencies": {
     "@elastic/elasticsearch": "7.16.0",
     "@godaddy/terminus": "^4.9.0",
+    "@oas-tools/core": "^3.0.2",
     "dotenv": "8.2.0",
     "elastic-apm-node": "^3.33.0",
     "etcd3": "^1.1.0",
