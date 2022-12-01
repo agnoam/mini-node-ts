@@ -1,6 +1,6 @@
 {
   "name": "node-mini-app",
-  "version": "2.5.0",
+  "version": "3.0.0",
   "description": "Extreamly minimal node js server (express, ts, jest, db, swagger)",
   "main": "dist/server.js",
   "scripts": {
@@ -20,6 +20,7 @@
   "dependencies": {
     "@elastic/elasticsearch": "7.16.0",
     "@godaddy/terminus": "^4.9.0",
+    "@oas-tools/core": "^3.0.2",
     "dotenv": "8.2.0",
     "elastic-apm-node": "^3.33.0",
     "etcd3": "^1.1.0",
@@ -30,10 +31,10 @@
     "md5": "2.2.1",
     "mongoose": "5.9.3",
     "morgan": "^1.10.0",
+    "oas-tools": "^2.2.1",
     "redis": "^3.1.2",
     "reflect-metadata": "^0.1.13",
     "socket.io": "2.4.0",
-    "swagger-tools": "^0.10.4",
     "winston": "^3.6.0",
     "winston-elasticsearch": "^0.16.1",
     "yarn": "^1.22.11"

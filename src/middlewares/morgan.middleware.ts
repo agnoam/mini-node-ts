@@ -1,34 +1,48 @@
 
+import { inject, injectable } from "inversify";
 import morgan, { StreamOptions } from "morgan";
-import { Logger } from '../config/logger.config';
+import winston from "winston";
 
-// Override the stream method by telling
-// Morgan to use our custom logger instead of the console.log.
-const stream: StreamOptions = {
-  // Use the http severity
-  write: (message) => Logger.http(message)
-};
+import { TYPES } from "../config/di.types.config";
+import { LoggerConfig } from '../config/logger.config';
 
-// Skip all the Morgan http log if the 
-// application is not running in development mode.
-// This method is not really needed here since 
-// we already told to the logger that it should print
-// only warning and error messages in production.
-const skip = () => {
-  const env = process.env.NODE_ENV || "development";
-  return env !== "development";
-};
 
-// Build the morgan middleware
-const MorganMiddleware = morgan(
-  // Define message format string (this is the default one).
-  // The message format is made from tokens, and each token is
-  // defined inside the Morgan library.
-  // You can create your custom token to show what do you want from a request.
-  ":method :url :status :res[content-length] - :response-time ms",
-  // Options: in this case, I overwrote the stream and the skip logic.
-  // See the methods above.
-  { stream, skip }
-);
+@injectable()
+class MorganMiddleware {
+  private Logger: winston.Logger;
+
+  constructor(@inject(TYPES.LoggerConfig) loggerConfig: LoggerConfig) {
+    this.Logger = loggerConfig.Logger;
+  }
+
+  // Override the stream method by telling
+  // Morgan to use our custom logger instead of the console.log.
+  private stream: StreamOptions = {
+    // Use the http severity
+    write: (message) => this.Logger.http(message)
+  };
+
+  // Skip all the Morgan http log if the 
+  // application is not running in development mode.
+  // This method is not really needed here since 
+  // we already told to the logger that it should print
+  // only warning and error messages in production.
+  private skip = () => {
+    const env = process.env.NODE_ENV || "development";
+    return env !== "development";
+  };
+
+  // Build the morgan middleware
+  public implementation = morgan(
+    // Define message format string (this is the default one).
+    // The message format is made from tokens, and each token is
+    // defined inside the Morgan library.
+    // You can create your custom token to show what do you want from a request.
+    ":method :url :status :res[content-length] - :response-time ms",
+    // Options: in this case, I overwrote the stream and the skip logic.
+    // See the methods above.
+    { stream: this.stream, skip: this.skip }
+  );
+}
 
 export default MorganMiddleware;

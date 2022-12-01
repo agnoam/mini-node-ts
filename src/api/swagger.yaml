@@ -1,42 +1,33 @@
-swagger: "2.0"
+openapi: "3.0.0"
 info:
   description: "Extreamly minimal node js server (Express, TypeScript, Jest, DB, Swagger)"
-  version: "1.0.0" 
+  version: "3.0.0" 
   title: "mini-node-ts"
 
-host: "localhost:8810"
+servers: 
+  - url: "http://localhost:8810"
 tags:
   - name: "user"
     description: "Operations about user"
 
-schemes:
-  - "http"
-
 paths:
   /:
-    x-swagger-router-controller: routes.config
+    x-router-controller: routes.config
     get:
       operationId: defaultRoute
       summary: "Check server's avilablity"
       responses:
         "200":
           description: "Response OK"
-          schema:
-            type: "string"
-            example: "server is running"
 
   /users/test:
-    x-swagger-router-controller: routes.config
+    x-router-controller: routes.config
     get:
       operationId: testRequest
       summary: Test request for checking the user component, don't forget to change it or delete it
-      produces:
-        - "application/json"
       responses:
         "200":
           description: "Request ran successfuly"
-          schema:
-            $ref: "#/definitions/UserTestResult"
 
   # /users/login:
   #   post:
@@ -93,60 +84,6 @@ paths:
   #       "200": 
   #         schema:
   #           $ref: "#definitions/ReturnObj"
-definitions:
-  UserLoginObj:
-    type: "object"
-    required:
-      - "username"
-      - "password"
-    properties:
-      username:
-        type: "string"
-      password:
-        type: "string"
-        format: "password"
-  LoginResponseObj:
-    type: "object"
-    required:
-      - "name"
-      - "profileImage"
-      - "date"
-    properties:
-      name:
-        type: "string"
-      profileImage:
-        type: "string"
-        format: "uri"
-      date:
-        type: "integer"
-        format: "int64"
-        example: 1614534839272
-  UserTestResult:
-    type: "object"
-    properties:
-      description:
-        type: "string"
-        example: 'Current date:'
-      date:
-        type: "integer"
-        format: "int64"
-        example: 1644516162021
-  ReturnObj:
-    type: "object"
-    properties:
-      date:
-        type: "integer"
-        format: "int64"
-        example: 1614534839272
-      description:
-        type: "string"
-  ApiResponse:
-    type: "object"
-    properties:
-      description:
-        type: "string"
-
-
         
 # securityDefinitions:
 #   petstore_auth:

@@ -1,57 +1,73 @@
 import "reflect-metadata"; // Used for dependcy-injection (inversify)
 
+import http, { Server } from "http";
 import express, { Application } from "express";
 import os from "os";
+import winston from "winston";
 import socketIO from "socket.io";
-import http, { Server } from "http";
-import { Span } from 'elastic-apm-node';
+import { Span, Agent } from 'elastic-apm-node';
+import { inject, injectable } from "inversify";
 
-import { ETCDConfig } from "./config/etcd.config";
-import { LoggerConfig, Logger } from "./config/logger.config";
-import { APMConfig, apm } from './config/apm.config';
+import { container } from "./configs/di.driver";
+import { EtcdDriver } from "./drivers/etcd.driver";
+import { LoggerDriver } from "./drivers/logger.driver";
+import { APMDriver } from './drivers/apm.driver';
+import { TYPES } from "./configs/di.types.config";
 import { ServerMiddleware } from "./middlewares/server.middleware";
-import { SwaggerConfig } from "./config/swagger.config";
+import { SwaggerConfig } from "./drivers/swagger.config";
+import { ProbeServer } from "./drivers/probe.config";
 import MorganMiddleware from './middlewares/morgan.middleware';
 import ErrorMiddleware from "./middlewares/error.middleware";
-
 
 import dotenv from 'dotenv';
 dotenv.config();
 
-export module ServerBoot {
-	const port: number = +process.env.PORT || 8810;
-	export const app: Application = express(); // Exported for testings
-	export const server: Server = createServer();
+@injectable()
+export class ServerBoot {
+	private port: number = +process.env.PORT || 8810;
+	app: Application = express(); // Exported for testings
+	server: Server = this.createServer();
 	
 	// TODO: Remove this if you does not want socket.io in your project
-	export const io: SocketIO.Server = getSocket(server);
+	io: SocketIO.Server = this.getSocket(this.server);
 
-	function createServer(): Server {
-		return http.createServer(app);
+	private Logger: winston.Logger;
+	private apm: Agent;
+
+	constructor(
+		@inject(TYPES.LoggerConfig) private LoggerConfig: LoggerDriver, 
+		@inject(TYPES.APMDriver) private APMDriver: APMDriver, 
+		@inject(TYPES.ETCDDriver) private ETCDConfig: EtcdDriver,
+		@inject(TYPES.ProbeServerConfig) private ProbeServer: ProbeServer,
+		@inject(TYPES.MorganMiddleware) private MorganMiddleware: MorganMiddleware
+	) {}
+
+	private createServer(): Server {
+		return http.createServer(this.app);
 	}
 
 	/* TODO: If you don't need socket.io in your project delete this, 
 		and don't forget to remove the `socket.io`, `@types/socket.io` dependencies */
-	function getSocket(server: Server): socketIO.Server {
+	private getSocket(server: Server): socketIO.Server {
 		return socketIO.listen(server);
 	}
 
-	export const listen = async (): Promise<Application> => {
-		await initializeConfigs();
-		await loadMiddlewares();
+	async listen(): Promise<Application> {
+		await this.initializeConfigs();
+		await this.loadMiddlewares();
 		
-		const localIP: string = findMyIP();
+		const localIP: string = this.findMyIP();
 		return new Promise( (resolve, reject) => {
-			server.listen(port, () => {
-				Logger.info(`Our app server is running on http://${os.hostname()}:${port}`);
-				Logger.info(`Server running on: http://${localIP}:${port}`);
-				resolve(app);
+			this.server.listen(this.port, () => {
+				this.Logger.info(`Our app server is running on http://${os.hostname()}:${this.port}`);
+				this.Logger.info(`Server running on: http://${localIP}:${this.port}`);
+				resolve(this.app);
 			});
 		});
 	}
 
-	const initializeConfigs = async (): Promise<void> => {
-		await ETCDConfig.initialize({ hosts: process.env.ETCD_HOST }, { 
+	private async initializeConfigs(): Promise<void> {
+		await this.ETCDConfig.initialize({ hosts: process.env.ETCD_HOST }, {
 			moduleConfigs: { genKeys: true, watchKeys: true, overrideSysObj: true },
 			envParams: {
 				ELASTIC_APM_SERVER_URL: 'test',
@@ -60,24 +76,26 @@ export module ServerBoot {
 			}
 		});
 		
-		LoggerConfig.initialize();
-		APMConfig.initializeAPM();
-
-		Logger.info('Configurations initialized successfuly');
+		this.LoggerConfig.initialize();
+		this.APMDriver.initializeAPM();
+		
+		this.Logger = this.LoggerConfig.Logger;
+		this.Logger.info('Configurations initialized successfuly');
 	}
 
-	const loadMiddlewares = async (): Promise<void> => {
-		app.use( express.json() );
-		app.use( express.urlencoded({ extended: true }) );
-		app.use( ErrorMiddleware );
-		app.use( MorganMiddleware );
-		app.use( ServerMiddleware );
+	private async loadMiddlewares(): Promise<void> {
+		this.app.use( express.json() );
+		this.app.use( express.urlencoded({ extended: true }) );
+		this.app.use( ErrorMiddleware );
+		this.app.use( this.MorganMiddleware.implementation );
+		this.app.use( ServerMiddleware );
 
-		await SwaggerConfig(app);
+		await SwaggerConfig(this.app);
+		this.ProbeServer.initializeProbeServer(this.server);
 	}
 
-	export const findMyIP = (): string => {
-		const span: Span = apm.startSpan('Finding IP address');
+	public findMyIP(): string {
+		const span: Span = this.apm.startSpan('Finding IP address');
 		
 		// Get the server's local ip
 		const ifaces: NetworkInterface = os.networkInterfaces();
@@ -109,7 +127,15 @@ interface NetworkInterface {
 	[index: string]: os.NetworkInterfaceInfo[];
 }
 
-if (process.env.NODE_ENV !== "test") {
-	// Running the server
-	ServerBoot.listen();
-}
+// if (process.env.NODE_ENV !== "test") {
+	// // Running the server
+	// ServerBoot().listen();
+// }
+
+const _loggerConfig = container.get<LoggerDriver>(TYPES.LoggerConfig);
+const _apmConfig = container.get<APMDriver>(TYPES.APMDriver);
+const _etcdConfig = container.get<EtcdDriver>(TYPES.ETCDDriver);
+const _probeServer = container.get<ProbeServer>(TYPES.ProbeServerConfig);
+const _morganMiddleware = container.get<MorganMiddleware>(TYPES.MorganMiddleware);
+
+new ServerBoot(_loggerConfig, _apmConfig, _etcdConfig, _probeServer, _morganMiddleware).listen();

@@ -2,10 +2,12 @@ FROM node:slim
 
 WORKDIR /usr/src/mini-node
 
+# Cache the package.json and the packages
+COPY package.json ./
+RUN yarn
+
 # Copy the project into /usr/src/mini-node folder
 COPY . .
-RUN rm -rf ./node_modules
-# RUN rm -rf yarn.lock
 
 # Building dist folder
 RUN yarn

@@ -1,8 +1,10 @@
-import { InputUserData, IUser, UserModel } from "./user.model";
-import md5 from 'md5';
-import { apm } from '../../config/apm.config';
 import { inject, injectable } from "inversify";
+import { Agent } from 'elastic-apm-node';
+import md5 from 'md5';
+
 import { TYPES } from "../../config/di.types.config";
+import { InputUserData, IUser, UserModel } from "./user.model";
+import { APMConfig } from '../../config/apm.config';
 import { DbDriver } from "../../config/db.config";
 
 /* 
@@ -11,10 +13,14 @@ import { DbDriver } from "../../config/db.config";
 */
 @injectable()
 export class UserDataLayer {
-    constructor(/*@inject(TYPES.DbDriver) db: DbDriver*/) {}
+    private apm: Agent;
+
+    constructor(@inject(TYPES.APMConfig) APMConfig: APMConfig /*@inject(TYPES.DbDriver) db: DbDriver*/) {
+        this.apm = APMConfig.apm;
+    }
     
     async createNewUser(userData: InputUserData): Promise<IUser> {
-        const span = apm.startSpan('Writing user to DB');
+        const span = this.apm.startSpan('Writing user to DB');
         
         // Hashing password before saving it to the DB
         userData.password = md5(userData.password);
@@ -24,14 +30,14 @@ export class UserDataLayer {
     }
 
     deleteUser(username: string): void {
-        const span = apm.startSpan('Delete user from DB');
+        const span = this.apm.startSpan('Delete user from DB');
         UserModel.remove({ username });
         span.end();
     }
 
     async isLegit(username: string, password: string): Promise<IUser> {
         try {
-            const span = apm.startSpan('Is creds legit');
+            const span = this.apm.startSpan('Is creds legit');
             // const userQuery: DocumentQuery<IUser, IUser> = UserModel.findOne({ username: username });
             // const userData: IUser = await userQuery.exec();
 
@@ -45,7 +51,7 @@ export class UserDataLayer {
             return null;
         } catch(ex) {
             console.error(`ex with querying db: `, ex);
-            apm.captureError(ex);
+            this.apm.captureError(ex);
         }
     }
 }
