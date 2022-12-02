@@ -1,13 +1,14 @@
 {
   "name": "node-mini-app",
-  "version": "3.0.0",
+  "templateVersion": "3.0.0",
+  "version": "0.0.1",
   "description": "Extreamly minimal node js server (express, ts, jest, db, swagger)",
   "main": "dist/server.js",
   "scripts": {
     "prebuild": "eslint --fix",
     "build": "tsc && yarn copy-files && webpack",
-    "copy-files": "cp -avr ./src/api ./dist/api",
-    "production": "node dist/code_bundle/server.bundle.js",
+    "copy-files": "cp -avr ./src/api ./dist/src/api",
+    "production": "node dist/src/server.js",
     "start": "ts-node src/server.ts",
     "dev": "nodemon --inspect src/server.ts",
     "test": "jest"
