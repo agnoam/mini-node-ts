@@ -3,23 +3,19 @@ import { inject, injectable } from "inversify";
 import morgan, { StreamOptions } from "morgan";
 import winston from "winston";
 
-import { TYPES } from "../config/di.types.config";
-import { LoggerConfig } from '../config/logger.config';
+import { TYPES } from "../configs/di.types.config";
+import { LoggerDriver } from '../drivers/logger.driver';
 
 
 @injectable()
 class MorganMiddleware {
-  private Logger: winston.Logger;
-
-  constructor(@inject(TYPES.LoggerConfig) loggerConfig: LoggerConfig) {
-    this.Logger = loggerConfig.Logger;
-  }
+  constructor(@inject(TYPES.LoggerDriver) private LoggerDriver: LoggerDriver) {}
 
   // Override the stream method by telling
   // Morgan to use our custom logger instead of the console.log.
   private stream: StreamOptions = {
     // Use the http severity
-    write: (message) => this.Logger.http(message)
+    write: (message) => this.LoggerDriver.Logger.http(message)
   };
 
   // Skip all the Morgan http log if the 

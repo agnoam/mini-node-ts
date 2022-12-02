@@ -2,10 +2,10 @@ import { inject, injectable } from "inversify";
 import { Agent } from 'elastic-apm-node';
 import md5 from 'md5';
 
-import { TYPES } from "../../config/di.types.config";
+import { TYPES } from "../../configs/di.types.config";
+import { APMDriver } from '../../drivers/apm.driver';
+import { DbDriver } from "../../drivers/db.driver";
 import { InputUserData, IUser, UserModel } from "./user.model";
-import { APMConfig } from '../../config/apm.config';
-import { DbDriver } from "../../config/db.config";
 
 /* 
     Description: 
@@ -13,31 +13,23 @@ import { DbDriver } from "../../config/db.config";
 */
 @injectable()
 export class UserDataLayer {
-    private apm: Agent;
-
-    constructor(@inject(TYPES.APMConfig) APMConfig: APMConfig /*@inject(TYPES.DbDriver) db: DbDriver*/) {
-        this.apm = APMConfig.apm;
-    }
+    constructor(/*@inject(TYPES.DbDriver) db: DbDriver*/) {}
     
+    @APMDriver.traceMethod({ spanName: 'Writing user to DB' })
     async createNewUser(userData: InputUserData): Promise<IUser> {
-        const span = this.apm.startSpan('Writing user to DB');
-        
         // Hashing password before saving it to the DB
         userData.password = md5(userData.password);
-        
-        span.end();
         return await UserModel.create(userData);
     }
 
+    @APMDriver.traceMethod({ spanName: 'Delete user from DB' })
     deleteUser(username: string): void {
-        const span = this.apm.startSpan('Delete user from DB');
         UserModel.remove({ username });
-        span.end();
     }
 
+    @APMDriver.traceMethod({ spanName: 'Is creds verified' })
     async isLegit(username: string, password: string): Promise<IUser> {
         try {
-            const span = this.apm.startSpan('Is creds legit');
             // const userQuery: DocumentQuery<IUser, IUser> = UserModel.findOne({ username: username });
             // const userData: IUser = await userQuery.exec();
 
@@ -46,12 +38,10 @@ export class UserDataLayer {
             //     span.end();
             //     return userData;
             // }
-
-            span.end();
             return null;
         } catch(ex) {
             console.error(`ex with querying db: `, ex);
-            this.apm.captureError(ex);
+            throw ex;
         }
     }
 }

@@ -1,7 +1,7 @@
-import { ServerBoot } from '../src/server';
-
 import { Application } from 'express';
 import request, { Response } from 'supertest';
+
+import { ServerBoot } from '../src/server';
 
 describe('Routes tests', () => {
     let app: Application;
