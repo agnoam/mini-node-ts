@@ -36,7 +36,7 @@ export class EtcdDriver {
 
     private defaultConfigs: IETCDConfigurations = {
         envParams: {},
-        moduleConfigs: {
+        driverConfigs: {
             dirname: process.env.ETCD_SERVICE_NAME
         }
     }
@@ -58,7 +58,7 @@ export class EtcdDriver {
 
     // Override the default configurations with those passed from the user  
     private overrideDefaultConfigs(customConfigs: IETCDConfigurations): IETCDConfigurations {
-        customConfigs.moduleConfigs = { ...this.defaultConfigs.moduleConfigs, ...customConfigs.moduleConfigs };
+        customConfigs.driverConfigs = { ...this.defaultConfigs.driverConfigs, ...customConfigs.driverConfigs };
         const overwrittenObject = { ...this.defaultConfigs, ...customConfigs };
 
         return overwrittenObject;
@@ -76,7 +76,7 @@ export class EtcdDriver {
             this.createClient(connectionOptions);
             this._etcdWatcher = this.client.watch();
 
-            if (!this.proccesedConfigurations.moduleConfigs?.dirname) 
+            if (!this.proccesedConfigurations.driverConfigs?.dirname) 
                 throw 'ETCD_SERVICE_NAME not found in environment variables';
             if (!this.proccesedConfigurations?.envParams || !Object.keys(this.proccesedConfigurations?.envParams).length)
                 throw 'Configs arg does not contains any properties';
@@ -108,7 +108,7 @@ export class EtcdDriver {
      * @param val The new value
      */
     private updateEnv(propertyName: string, val: any): void {
-        if (this.proccesedConfigurations.moduleConfigs.overrideSysObj) {
+        if (this.proccesedConfigurations.driverConfigs.overrideSysObj) {
             console.log('Update new key in process.env');
             process.env[propertyName] = val;
         }
@@ -138,7 +138,7 @@ export class EtcdDriver {
                 if (this.envParams)
                     delete this.envParams[propertyName];
                 
-                if (this.proccesedConfigurations.moduleConfigs?.overrideSysObj)
+                if (this.proccesedConfigurations.driverConfigs?.overrideSysObj)
                     delete process.env[propertyName];
 
                 // In case the key deleted,
@@ -154,7 +154,7 @@ export class EtcdDriver {
      private async initializeProcess(): Promise<void> {
         for (const propertyName of Object.keys(this.proccesedConfigurations?.envParams)) {
             const propertySetting: IETCDPropertyDefenition = this.getPropertySetting(propertyName);
-            const generatedEtcdPath: string = `${this.proccesedConfigurations.moduleConfigs.dirname}/${propertyName}`;
+            const generatedEtcdPath: string = `${this.proccesedConfigurations.driverConfigs.dirname}/${propertyName}`;
             const etcdEntryName: string = propertySetting?.etcdPath || generatedEtcdPath;
             
             // Checking the etcd entry exists. in case it does it will be set, else it will be the defaultValue
@@ -162,7 +162,7 @@ export class EtcdDriver {
             const strDefaultVal: string | null | undefined = this.proccesedConfigurations.envParams[propertyName] !== '[object Object]' ?
                 this.proccesedConfigurations.envParams[propertyName]?.toString() : undefined;
             
-            if (this.proccesedConfigurations.moduleConfigs?.overrideSysObj) {
+            if (this.proccesedConfigurations.driverConfigs?.overrideSysObj) {
                 process.env[propertyName] = etcdVal || process.env[propertyName] || propertySetting?.defaultValue || strDefaultVal;
                 console.log(`process.env[${propertyName}]:`, process.env[propertyName]);
             }
@@ -170,18 +170,31 @@ export class EtcdDriver {
             if (!this.envParams) this.envParams = {};
             this.envParams[propertyName] = etcdVal || process.env[propertyName] || propertySetting?.defaultValue || strDefaultVal;
 
-            if (this.proccesedConfigurations.moduleConfigs?.watchKeys) {
+            if (this.proccesedConfigurations.driverConfigs?.watchKeys) {
                 this.watchForChanges(etcdEntryName, propertyName);
             }
 
-            if (!etcdVal && this.proccesedConfigurations.moduleConfigs?.genKeys) 
-                await this.client.put(etcdEntryName).value(process.env[propertyName]);
+            if (!etcdVal && this.proccesedConfigurations.driverConfigs?.genKeys) {
+                // Checking whether the client confirmed to change out of scope changes or the change is in the service scope
+                if (this.proccesedConfigurations.driverConfigs?.overrideNotInScope || this.isInScope(etcdEntryName)) {
+                    await this.client.put(etcdEntryName).value(process.env[propertyName]);
+                } else {
+                    console.log('Can not change/push out of scope variables, Property can be changed in driverConfigs');
+                }
+            }
         }
+    }
+
+    /**
+     * @description Validate whether a key is in service's scope
+     */
+    private isInScope(keyName: string): boolean {
+        return keyName.split('/')[0] === this.proccesedConfigurations.driverConfigs.dirname;
     }
 }
 
-// Module configurations
-interface IETCDModuleConfigs {
+// Driver configurations
+interface IETCDDriverConfigs {
     /**
      * @description The default "directory" (static-prefix) to search in keys, and save them
      */
@@ -203,6 +216,11 @@ interface IETCDModuleConfigs {
      * @description Watch the keys for change and update
      */
     watchKeys?: boolean;
+
+    /**
+     * @description Allow to push/change variable outside service's scope - default value: false
+     */
+    overrideNotInScope?: boolean;
 }
 
 interface IETCDPropertyDefenition {
@@ -218,11 +236,15 @@ interface IETCDPropertyDefenition {
 }
 
 export interface IETCDConfigurations {
-    moduleConfigs?: IETCDModuleConfigs;
     envParams: {
         // If the value is string, it's the defaultValue
         [propertyName: string]: IETCDPropertyDefenition | string;
     }
+
+    /**
+     * @description Specification of module configurations
+     */
+    driverConfigs?: IETCDDriverConfigs;
 }
 
 export interface IEnvParams {
