@@ -148,13 +148,23 @@ export class EtcdDriver {
     }
 
     /**
+     * @description Create environemnt specific "directories" in service's "directory" just in case specified
+     */
+    private getEnvironemntDir(): string {
+        if (this.proccesedConfigurations?.driverConfigs?.genEnvDirectories && process.env.NODE_ENV)
+            return `${process.env.NODE_ENV}/`;
+        return '';
+    }
+
+    /**
      * @description Initializing `process.env` property keys, Checking for existence of the properties in the etcd.
      * In case the property exists, set it in the `process.env` object.
      */
      private async initializeProcess(): Promise<void> {
         for (const propertyName of Object.keys(this.proccesedConfigurations?.envParams)) {
             const propertySetting: IETCDPropertyDefenition = this.getPropertySetting(propertyName);
-            const generatedEtcdPath: string = `${this.proccesedConfigurations.driverConfigs.dirname}/${propertyName}`;
+            const envDir: string = this.getEnvironemntDir();
+            const generatedEtcdPath: string = `/${this.proccesedConfigurations.driverConfigs.dirname}/${envDir}${propertyName}`;
             const etcdEntryName: string = propertySetting?.etcdPath || generatedEtcdPath;
             
             // Checking the etcd entry exists. in case it does it will be set, else it will be the defaultValue
@@ -189,7 +199,19 @@ export class EtcdDriver {
      * @description Validate whether a key is in service's scope
      */
     private isInScope(keyName: string): boolean {
-        return keyName.split('/')[0] === this.proccesedConfigurations.driverConfigs.dirname;
+        /* 
+            In case the key name includes minimum 2 `/`
+            For example `/<service_name>/<some_key>`
+        */
+        const splittedKey: string[] = keyName.split('/');
+        if (splittedKey.length >= 3) {
+            if (splittedKey.length == 3 && splittedKey[splittedKey.length-1] !== '')
+                return true;
+
+            return splittedKey.length > 3;
+        }
+
+        return false;
     }
 }
 
@@ -202,18 +224,18 @@ interface IETCDDriverConfigs {
     
     /**
      * @description Generating the keys if not exists in etcd by the given `defaultValue`. 
-     * default false 
+     * default value: false 
      */
     genKeys?: boolean;
 
     /**
      * @description Override the `process.env.${key}` with the data gathered from etcd. 
-     * Otherwise, env will be accessed by `ETCDConfig.envParams`
+     * Otherwise, env will be accessed by `ETCDConfig.envParams` - default value: false
      */
     overrideSysObj?: boolean;
     
     /**
-     * @description Watch the keys for change and update
+     * @description Watch the keys for change and update - default value: undefined
      */
     watchKeys?: boolean;
 
@@ -221,6 +243,11 @@ interface IETCDDriverConfigs {
      * @description Allow to push/change variable outside service's scope - default value: false
      */
     overrideNotInScope?: boolean;
+
+    /**
+     * @description Save the environemnts specific variables in the service's etcd directory - default value: false
+     */
+    genEnvDirectories?: boolean;
 }
 
 interface IETCDPropertyDefenition {
