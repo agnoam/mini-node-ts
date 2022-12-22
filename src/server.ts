@@ -8,7 +8,7 @@ import socketIO from "socket.io";
 import { Span, Agent } from 'elastic-apm-node';
 import { inject, injectable } from "inversify";
 
-import { container } from "./configs/di.driver";
+import { container } from "./configs/di.config";
 import { EtcdDriver } from "./drivers/etcd.driver";
 import { LoggerDriver } from "./drivers/logger.driver";
 import { APMDriver } from './drivers/apm.driver';
