@@ -4,17 +4,15 @@ import winston, { Logform } from 'winston';
 import { ElasticsearchTransport } from 'winston-elasticsearch';
 
 import packageJSON from '../../package.json';
-import { APMConfig } from './apm.config';
-import { TYPES } from './di.types.config';
+import { APMDriver } from './apm.driver';
+import { TYPES } from '../configs/di.types.config';
 // import { ElasticSerachConfig } from './elasticsearch.config';
 
 console.log('import logger.config');
 
 @injectable()
-export class LoggerConfig {  
+export class LoggerDriver {  
     private _logger: winston.Logger;
-    private apm: apm.Agent;
-
     private _defaultMetadata: IMetadata = { 
         service: process.env.LOGGER_SERVICE_NAME || packageJSON.name, 
         version: process.env.LOGGER_SERVICE_VERSION || packageJSON.version 
@@ -24,9 +22,7 @@ export class LoggerConfig {
         return this._logger;
     }
 
-    constructor(@inject(TYPES.APMConfig) apmConfig: APMConfig) {
-        this.apm = apmConfig.apm;
-    }
+    constructor() {}
 
     initialize(configs?: ILoggerInitProps): void {
         if (!this.Logger) {
@@ -51,7 +47,7 @@ export class LoggerConfig {
                 format: winston.format.json(),
                 defaultMeta: configs?.defaultMetadata || this._defaultMetadata,
                 transports: [
-                    process.env.NODE_ENV !== 'production' ?
+                    // process.env.NODE_ENV !== 'production' ?
                         new winston.transports.Console({
                             format: winston.format.combine(
                                 winston.format.timestamp(),
@@ -74,7 +70,7 @@ export class LoggerConfig {
                                 })
                             )
                         })
-                    : undefined,
+                    // : undefined,
                     // elasticTransport
                 ]
             });

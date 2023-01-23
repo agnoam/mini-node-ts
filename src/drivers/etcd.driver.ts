@@ -2,8 +2,8 @@ import winston from 'winston';
 import { inject, injectable } from 'inversify';
 import { Etcd3, IKeyValue, IOptions as IETCDOptions, WatchBuilder, Watcher } from 'etcd3';
 
-import { TYPES } from './di.types.config';
-import { LoggerConfig } from './logger.config';
+import { TYPES } from '../configs/di.types.config';
+import { LoggerDriver } from './logger.driver';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -26,7 +26,7 @@ dotenv.config();
  * All parameters get a copy inside envParams object
  */
 @injectable()
-export class ETCDConfig {
+export class EtcdDriver {
     // private Logger: winston.Logger;
 
     private client: Etcd3 = null;
@@ -36,7 +36,7 @@ export class ETCDConfig {
 
     private defaultConfigs: IETCDConfigurations = {
         envParams: {},
-        moduleConfigs: {
+        driverConfigs: {
             dirname: process.env.ETCD_SERVICE_NAME
         }
     }
@@ -58,7 +58,7 @@ export class ETCDConfig {
 
     // Override the default configurations with those passed from the user  
     private overrideDefaultConfigs(customConfigs: IETCDConfigurations): IETCDConfigurations {
-        customConfigs.moduleConfigs = { ...this.defaultConfigs.moduleConfigs, ...customConfigs.moduleConfigs };
+        customConfigs.driverConfigs = { ...this.defaultConfigs.driverConfigs, ...customConfigs.driverConfigs };
         const overwrittenObject = { ...this.defaultConfigs, ...customConfigs };
 
         return overwrittenObject;
@@ -76,7 +76,7 @@ export class ETCDConfig {
             this.createClient(connectionOptions);
             this._etcdWatcher = this.client.watch();
 
-            if (!this.proccesedConfigurations.moduleConfigs?.dirname) 
+            if (!this.proccesedConfigurations.driverConfigs?.dirname) 
                 throw 'ETCD_SERVICE_NAME not found in environment variables';
             if (!this.proccesedConfigurations?.envParams || !Object.keys(this.proccesedConfigurations?.envParams).length)
                 throw 'Configs arg does not contains any properties';
@@ -108,7 +108,7 @@ export class ETCDConfig {
      * @param val The new value
      */
     private updateEnv(propertyName: string, val: any): void {
-        if (this.proccesedConfigurations.moduleConfigs.overrideSysObj) {
+        if (this.proccesedConfigurations.driverConfigs.overrideSysObj) {
             console.log('Update new key in process.env');
             process.env[propertyName] = val;
         }
@@ -138,7 +138,7 @@ export class ETCDConfig {
                 if (this.envParams)
                     delete this.envParams[propertyName];
                 
-                if (this.proccesedConfigurations.moduleConfigs?.overrideSysObj)
+                if (this.proccesedConfigurations.driverConfigs?.overrideSysObj)
                     delete process.env[propertyName];
 
                 // In case the key deleted,
@@ -148,13 +148,23 @@ export class ETCDConfig {
     }
 
     /**
+     * @description Create environemnt specific "directories" in service's "directory" just in case specified
+     */
+    private getEnvironemntDir(): string {
+        if (this.proccesedConfigurations?.driverConfigs?.genEnvDirectories && process.env.NODE_ENV)
+            return `${process.env.NODE_ENV}/`;
+        return '';
+    }
+
+    /**
      * @description Initializing `process.env` property keys, Checking for existence of the properties in the etcd.
      * In case the property exists, set it in the `process.env` object.
      */
      private async initializeProcess(): Promise<void> {
         for (const propertyName of Object.keys(this.proccesedConfigurations?.envParams)) {
             const propertySetting: IETCDPropertyDefenition = this.getPropertySetting(propertyName);
-            const generatedEtcdPath: string = `${this.proccesedConfigurations.moduleConfigs.dirname}/${propertyName}`;
+            const envDir: string = this.getEnvironemntDir();
+            const generatedEtcdPath: string = `/${this.proccesedConfigurations.driverConfigs.dirname}/${envDir}${propertyName}`;
             const etcdEntryName: string = propertySetting?.etcdPath || generatedEtcdPath;
             
             // Checking the etcd entry exists. in case it does it will be set, else it will be the defaultValue
@@ -162,7 +172,7 @@ export class ETCDConfig {
             const strDefaultVal: string | null | undefined = this.proccesedConfigurations.envParams[propertyName] !== '[object Object]' ?
                 this.proccesedConfigurations.envParams[propertyName]?.toString() : undefined;
             
-            if (this.proccesedConfigurations.moduleConfigs?.overrideSysObj) {
+            if (this.proccesedConfigurations.driverConfigs?.overrideSysObj) {
                 process.env[propertyName] = etcdVal || process.env[propertyName] || propertySetting?.defaultValue || strDefaultVal;
                 console.log(`process.env[${propertyName}]:`, process.env[propertyName]);
             }
@@ -170,18 +180,43 @@ export class ETCDConfig {
             if (!this.envParams) this.envParams = {};
             this.envParams[propertyName] = etcdVal || process.env[propertyName] || propertySetting?.defaultValue || strDefaultVal;
 
-            if (this.proccesedConfigurations.moduleConfigs?.watchKeys) {
+            if (this.proccesedConfigurations.driverConfigs?.watchKeys) {
                 this.watchForChanges(etcdEntryName, propertyName);
             }
 
-            if (!etcdVal && this.proccesedConfigurations.moduleConfigs?.genKeys) 
-                await this.client.put(etcdEntryName).value(process.env[propertyName]);
+            if (!etcdVal && this.proccesedConfigurations.driverConfigs?.genKeys) {
+                // Checking whether the client confirmed to change out of scope changes or the change is in the service scope
+                if (this.proccesedConfigurations.driverConfigs?.overrideNotInScope || this.isInScope(etcdEntryName)) {
+                    await this.client.put(etcdEntryName).value(process.env[propertyName]);
+                } else {
+                    console.log('Can not change/push out of scope variables, Property can be changed in driverConfigs');
+                }
+            }
         }
+    }
+
+    /**
+     * @description Validate whether a key is in service's scope
+     */
+    private isInScope(keyName: string): boolean {
+        /* 
+            In case the key name includes minimum 2 `/`
+            For example `/<service_name>/<some_key>`
+        */
+        const splittedKey: string[] = keyName.split('/');
+        if (splittedKey.length >= 3) {
+            if (splittedKey.length == 3 && splittedKey[splittedKey.length-1] !== '')
+                return true;
+
+            return splittedKey.length > 3;
+        }
+
+        return false;
     }
 }
 
-// Module configurations
-interface IETCDModuleConfigs {
+// Driver configurations
+interface IETCDDriverConfigs {
     /**
      * @description The default "directory" (static-prefix) to search in keys, and save them
      */
@@ -189,20 +224,30 @@ interface IETCDModuleConfigs {
     
     /**
      * @description Generating the keys if not exists in etcd by the given `defaultValue`. 
-     * default false 
+     * default value: false 
      */
     genKeys?: boolean;
 
     /**
      * @description Override the `process.env.${key}` with the data gathered from etcd. 
-     * Otherwise, env will be accessed by `ETCDConfig.envParams`
+     * Otherwise, env will be accessed by `ETCDConfig.envParams` - default value: false
      */
     overrideSysObj?: boolean;
     
     /**
-     * @description Watch the keys for change and update
+     * @description Watch the keys for change and update - default value: undefined
      */
     watchKeys?: boolean;
+
+    /**
+     * @description Allow to push/change variable outside service's scope - default value: false
+     */
+    overrideNotInScope?: boolean;
+
+    /**
+     * @description Save the environemnts specific variables in the service's etcd directory - default value: false
+     */
+    genEnvDirectories?: boolean;
 }
 
 interface IETCDPropertyDefenition {
@@ -218,11 +263,15 @@ interface IETCDPropertyDefenition {
 }
 
 export interface IETCDConfigurations {
-    moduleConfigs?: IETCDModuleConfigs;
     envParams: {
         // If the value is string, it's the defaultValue
         [propertyName: string]: IETCDPropertyDefenition | string;
     }
+
+    /**
+     * @description Specification of module configurations
+     */
+    driverConfigs?: IETCDDriverConfigs;
 }
 
 export interface IEnvParams {

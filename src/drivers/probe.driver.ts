@@ -5,21 +5,21 @@ import { inject, injectable } from 'inversify';
 import { createTerminus, TerminusOptions } from '@godaddy/terminus';
 
 import { ResponseStatus } from '../utils/consts';
-import { LoggerConfig } from './logger.config';
-import { TYPES } from './di.types.config';
+import { LoggerDriver } from './logger.driver';
+import { TYPES } from '../configs/di.types.config';
 
-console.log('import probe.config');
+console.log('import probe.driver');
 
 @injectable()
 export class ProbeServer {
     readyFlag: boolean = false;
     liveFlag: boolean = true;
+    
     private _errors = [];
-
     private Logger: Logger;
 
-    constructor(@inject(TYPES.LoggerConfig) LoggerConfig: LoggerConfig) {
-        this.Logger = LoggerConfig.Logger;
+    constructor(@inject(TYPES.LoggerDriver) LoggerDriver: LoggerDriver) {
+        this.Logger = LoggerDriver.Logger;
     }
 
     private async onSignal (): Promise<any> {

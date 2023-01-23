@@ -3,7 +3,7 @@ import redis, { RedisClient } from 'redis';
 import { promisify } from 'util';
 
 @injectable()
-export class RedisConfig {
+export class RedisDriver {
     private redisClient: RedisClient;
 
     constructor() {

@@ -8,18 +8,18 @@ import socketIO from "socket.io";
 import { Span, Agent } from 'elastic-apm-node';
 import { inject, injectable } from "inversify";
 
-import { ETCDConfig } from "./config/etcd.config";
-import { LoggerConfig } from "./config/logger.config";
-import { APMConfig } from './config/apm.config';
-import { TYPES } from "./config/di.types.config";
+import { container } from "./configs/di.config";
+import { EtcdDriver } from "./drivers/etcd.driver";
+import { LoggerDriver } from "./drivers/logger.driver";
+import { APMDriver } from './drivers/apm.driver';
+import { TYPES } from "./configs/di.types.config";
 import { ServerMiddleware } from "./middlewares/server.middleware";
-import { SwaggerConfig } from "./config/swagger.config";
-import { ProbeServer } from "./config/probe.config";
+import { SwaggerConfig } from "./configs/swagger.config";
+import { ProbeServer } from "./drivers/probe.driver";
 import MorganMiddleware from './middlewares/morgan.middleware';
 import ErrorMiddleware from "./middlewares/error.middleware";
 
 import dotenv from 'dotenv';
-import { container } from "./config/di.config";
 dotenv.config();
 
 @injectable()
@@ -35,10 +35,9 @@ export class ServerBoot {
 	private apm: Agent;
 
 	constructor(
-		@inject(TYPES.LoggerConfig) private LoggerConfig: LoggerConfig, 
-		@inject(TYPES.APMConfig) private APMConfig: APMConfig, 
-		@inject(TYPES.ETCDConfig) private ETCDConfig: ETCDConfig,
-		@inject(TYPES.ProbeServerConfig) private ProbeServer: ProbeServer,
+		@inject(TYPES.LoggerDriver) private LoggerDriver: LoggerDriver, 
+		@inject(TYPES.ETCDDriver) private ETCDConfig: EtcdDriver,
+		@inject(TYPES.ProbeServerDriver) private ProbeServer: ProbeServer,
 		@inject(TYPES.MorganMiddleware) private MorganMiddleware: MorganMiddleware
 	) {}
 
@@ -67,19 +66,19 @@ export class ServerBoot {
 	}
 
 	private async initializeConfigs(): Promise<void> {
-		await this.ETCDConfig.initialize({ hosts: process.env.ETCD_HOST }, {
-			moduleConfigs: { genKeys: true, watchKeys: true, overrideSysObj: true },
-			envParams: {
-				ELASTIC_APM_SERVER_URL: 'test',
-				MONGODB_URI: { defaultValue: undefined, etcdPath: 'mongodb_uri' },
-				ELASTICSEARCH_URI: 'http://localhost:9200'
-			}
-		});
+		// await this.ETCDConfig.initialize({ hosts: process.env.ETCD_HOST }, {
+		// 	moduleConfigs: { genKeys: true, watchKeys: true, overrideSysObj: true },
+		// 	envParams: {
+		// 		ELASTIC_APM_SERVER_URL: 'test',
+		// 		MONGODB_URI: { defaultValue: undefined, etcdPath: 'mongodb_uri' },
+		// 		ELASTICSEARCH_URI: 'http://localhost:9200'
+		// 	}
+		// });
 		
-		this.LoggerConfig.initialize();
-		this.APMConfig.initializeAPM();
+		this.LoggerDriver.initialize();
+		APMDriver.initializeAPM();
 		
-		this.Logger = this.LoggerConfig.Logger;
+		this.Logger = this.LoggerDriver.Logger;
 		this.Logger.info('Configurations initialized successfuly');
 	}
 
@@ -94,9 +93,8 @@ export class ServerBoot {
 		this.ProbeServer.initializeProbeServer(this.server);
 	}
 
+	@APMDriver.traceMethod({ spanName: 'Finding IP address' })
 	public findMyIP(): string {
-		const span: Span = this.apm.startSpan('Finding IP address');
-		
 		// Get the server's local ip
 		const ifaces: NetworkInterface = os.networkInterfaces();
 		let localIP: string;
@@ -118,7 +116,6 @@ export class ServerBoot {
 			});
 		});
 
-		span?.end();
 		return localIP; 
 	}
 } 
@@ -132,10 +129,9 @@ interface NetworkInterface {
 	// ServerBoot().listen();
 // }
 
-const _loggerConfig = container.get<LoggerConfig>(TYPES.LoggerConfig);
-const _apmConfig = container.get<APMConfig>(TYPES.APMConfig);
-const _etcdConfig = container.get<ETCDConfig>(TYPES.ETCDConfig);
-const _probeServer = container.get<ProbeServer>(TYPES.ProbeServerConfig);
+const _loggerConfig = container.get<LoggerDriver>(TYPES.LoggerDriver);
+const _etcdConfig = container.get<EtcdDriver>(TYPES.ETCDDriver);
+const _probeServer = container.get<ProbeServer>(TYPES.ProbeServerDriver);
 const _morganMiddleware = container.get<MorganMiddleware>(TYPES.MorganMiddleware);
 
-new ServerBoot(_loggerConfig, _apmConfig, _etcdConfig, _probeServer, _morganMiddleware).listen();
+new ServerBoot(_loggerConfig, _etcdConfig, _probeServer, _morganMiddleware).listen();
